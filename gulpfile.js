@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 const gulp         = require('gulp'),
       nodemon      = require('gulp-nodemon'),
       browserSync  = require('browser-sync'),
@@ -23,7 +23,7 @@ let paths = {
     server: {  
         entry: 'index.js'  
     }  
-};  
+}  
   
 // nodemon 的配置  
 let nodemonConfig = {  
@@ -51,7 +51,7 @@ gulp.task('sassTask', () => {
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
         .pipe(gulp.dest(paths.client.css))
         .pipe(reload({stream: true}))
-});
+})
 
 // 反向代理注入，自动刷新客户端
 gulp.task('server', ['sassTask', 'node'], function() {
@@ -65,20 +65,20 @@ gulp.task('server', ['sassTask', 'node'], function() {
         browser: 'chrome',
         notify: false,
         port: 4000 //这个是browserSync对http://localhost:3003 实现的代理端口
-    });
+    })
     gulp.watch(files).on("change", reload)
 })
 
 //默认任务
 gulp.task('default',['server'], ()=> {
-    console.log('running…… (Enjoy!)');
-});
+    console.log('running…… (Enjoy!)')
+})
 
 //压缩javascript 文件，压缩后文件放入build/js下   
 gulp.task('minifyjs', () => {
     gulp.src(paths.client.js + '*.js')
     .pipe(uglify())
     .pipe(gulp.dest('dist/js/'))
-});
+})
 // 最终构建任务
 gulp.task('bulid', ['minifyjs'])

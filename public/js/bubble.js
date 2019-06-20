@@ -1,8 +1,8 @@
 $(function () {
     $("#uploadBtn").on("change",function () {
-        let data = new FormData();
+        let data = new FormData()
         console.log(this)
-        data.append("file", document.getElementById('uploadBtn').files[0]);
+        data.append("file", document.getElementById('uploadBtn').files[0])
         $.ajax({
             url: '/upload',
             type: 'POST',
@@ -12,16 +12,16 @@ $(function () {
             data: data,
         })
         .done(function() {
-            console.log("success");
+            console.log("success")
         })
         .fail(function() {
-            console.log("error");
+            console.log("error")
         })
         .always(function() {
-            console.log("complete");
-        });
+            console.log("complete")
+        })
         
-    });
+    })
 
     $('.file').change(function(e) {
         $(this).addClass('change')
