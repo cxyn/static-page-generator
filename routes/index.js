@@ -8,7 +8,10 @@ module.exports = (router) => {
     const gm = require('gm')
     const path = require('path')
     const upload = require("../utils/upload")
+    const removeAll = require("../utils/removeAll")
     const oss = require("../utils/oss")
+    const request = require('request')
+    
 
     // 获取图片尺寸存入对象
     function getSize(item) {
@@ -72,13 +75,11 @@ module.exports = (router) => {
     }
 
     //切图api调用，累加实现计算坐标位置
-    function crop(imgObject, positionArr) {
-        
+    function crop(imgObject, positionArr) {    
         let cropDir = path.join(__dirname, '../public/uploads/') + 'crop-' + Date.now() +'/'
         try{
-            console.log('try')
             fs.statSync(cropDir)
-            console.log('切图目录存在')
+            console.log('切图目录已存在')
           }catch(e){
             fs.mkdir(cropDir, (err) => {
               if(err) {
@@ -88,10 +89,8 @@ module.exports = (router) => {
               console.log('创建切图目录成功')
             })
           }
-          console.log('promise前面')
         let promises = positionArr.map((postion, idx) => {
             return new Promise((resolve, reject) => {
-                console.log('promise里面')
                 gm(imgObject)
                 .crop(postion.size.width, postion.size.height, postion.coordinate.x, postion.coordinate.y)
                 .write(cropDir + 'crop-' + idx + '.png', (err, out) => {
@@ -105,6 +104,7 @@ module.exports = (router) => {
         console.log('第四步：切图')
         return Promise.all(promises)
     }
+
     // 遍历文件夹下面的图片
     let readDir = function scanFiles(dir, fileArr) {
         console.log('第五步：读取切图')
@@ -128,6 +128,7 @@ module.exports = (router) => {
 
     // 循环上传阿里云
     function uploadToOss(imgArray) {
+        console.log('第六步：上传切图至阿里云')
         let promises = imgArray.map((img, index) => {
             return new Promise((resolve, reject) => {
                 try {
@@ -145,7 +146,6 @@ module.exports = (router) => {
     // 路由
     router.post('/upload', upload.single('file'), async (ctx, next) => {
         // console.log(JSON.stringify(ctx.req.file));
-
         let pageInfo = {
             title: '静态页面',
             keywords: '关键词',
@@ -164,16 +164,16 @@ module.exports = (router) => {
         .then(data => { // 计算裁切坐标存入数据
             return cropPosition(data.heightArray, data.width)
         })
-        .then(positionArray => { //切图操作
+        .then(positionArray => { // 切图操作
             return crop(img, positionArray)
         })
-        .then(dir => { //读取切图文件夹所有文件
+        .then(dir => { // 读取切图文件夹所有文件
             return readDir(dir[0])
         })
-        .then(fileArray => { //上传至阿里云
+        .then(fileArray => { // 上传至阿里云
             return uploadToOss(fileArray)
         })
-        .then(urlArray => { //读取切图文件夹所有文件
+        .then(urlArray => { //路由注入
             router.get('/static-page', async(ctx, next) => {
                 await ctx.render('template-mobile', {
                     pageInfo,
@@ -181,7 +181,23 @@ module.exports = (router) => {
                 })
             })
         })
-        ctx.redirect('/static-page');
+        .then(() => { // 生成静态html并上传至阿里云
+            return new Promise((resolve, reject) => {
+                let todayDir = String(new Date().getFullYear()) + String(new Date().getMonth() + 1) + String(new Date().getDate())
+                let htmlPath = path.join(__dirname, '../public/uploads/', todayDir + '/', Date.now() + '.html')
+                let writeStream = fs.createWriteStream(htmlPath)
+                request(ctx.origin + '/static-page').pipe(writeStream)
+                writeStream.on('finish', () => { // 写入成功
+                    resolve(oss.put('static/pages/' + Date.now() + '.html', htmlPath))
+                })
+            })
+        })
+        .then(urlObj => { // 跳转至线上地址
+            let dir = path.join(__dirname, '../public/uploads/')
+            removeAll(dir)
+            ctx.redirect(urlObj.url)
+        })
+        ctx.body = 'success'
     })
     
 }
