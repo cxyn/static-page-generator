@@ -1,0 +1,41 @@
+form {
+    width: 200px;
+    margin: 150px auto;
+    text-align: center;
+}
+.file {
+    display: block;
+    width: 200px;
+    height: 100px;
+    border: 1px solid #ddd;
+    position: relative;
+    background-color: transparent;
+    &.change {
+        &::after {
+            content: '已选择，等待上传';
+        }
+    }
+}
+.file::after {
+    content: '请选择图片';
+    width: 200px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    color: #fff;
+    font-size: 16px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color:rgb(75, 100, 5);
+}
+.submit {
+    display: inline-block;
+    width: 120px;
+    height: 30px;
+    border: 0;
+    border-radius: 3px;
+    background-color: #f60;
+    color: #fff;
+    font-size: 14px;
+}

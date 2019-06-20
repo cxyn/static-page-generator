@@ -1,0 +1,51 @@
+{
+  "name": "static-page-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --inspect index",
+    "server": "pm2 start index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cxyn/static-page-generator.git"
+  },
+  "keywords": [
+    "koa2"
+  ],
+  "author": "Colin",
+  "license": "ISC",
+  "dependencies": {
+    "ali-oss": "^6.1.1",
+    "dotenv": "^6.1.0",
+    "ejs": "^2.6.1",
+    "gm": "^1.23.1",
+    "koa": "^2.5.3",
+    "koa-bodyparser": "^4.2.1",
+    "koa-favicon": "^2.0.1",
+    "koa-jwt": "^3.5.1",
+    "koa-logger": "^3.2.0",
+    "koa-multer": "^1.0.2",
+    "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
+    "koa-views": "^6.2.0",
+    "koa2-cors": "^2.0.6",
+    "mysql": "^2.16.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.5",
+    "gulp": "^3.0.0",
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-nodemon": "^2.4.2",
+    "gulp-plumber": "^1.2.1",
+    "gulp-sass": "^4.0.2",
+    "gulp-uglify": "^3.0.2",
+    "nodemon": "^1.18.10"
+  },
+  "bugs": {
+    "url": "https://github.com/cxyn/static-page-generator/issues"
+  },
+  "homepage": "https://github.com/cxyn/static-page-generator#readme"
+}
