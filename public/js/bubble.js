@@ -28,9 +28,15 @@ $(function () {
     })
     $('.submit').on('click', () => {
         if(!$('.file').val()) {
-            alert('请先选择图片')
+            layer.open({
+                title: '提示'
+                ,content: '请先选择图片'
+            })
             return false
         }
+        layer.load(1, {
+            shade: [0.5,'#999']
+        })
         $('#form').submit()
     })
 })

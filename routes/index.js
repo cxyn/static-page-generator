@@ -155,6 +155,7 @@ module.exports = (router) => {
         let width = 0, height = 0             //设计稿的宽高
         let img = path.join(__dirname, '../') + ctx.req.file.path  //当前切图的主体
         let fileName = ctx.req.file.fileName
+        let hash = Date.now()
 
         await getSize(img)
         
@@ -174,7 +175,7 @@ module.exports = (router) => {
             return uploadToOss(fileArray)
         })
         .then(urlArray => { //路由注入
-            router.get('/static-page', async(ctx, next) => {
+            router.get('/static-page-' + hash, async(ctx, next) => {
                 await ctx.render('template-mobile', {
                     pageInfo,
                     urlArray
@@ -186,16 +187,17 @@ module.exports = (router) => {
                 let todayDir = String(new Date().getFullYear()) + String(new Date().getMonth() + 1) + String(new Date().getDate())
                 let htmlPath = path.join(__dirname, '../public/uploads/', todayDir + '/', Date.now() + '.html')
                 let writeStream = fs.createWriteStream(htmlPath)
-                request(ctx.origin + '/static-page').pipe(writeStream)
+                request(ctx.origin + '/static-page-' + hash).pipe(writeStream)
                 writeStream.on('finish', () => { // 写入成功
                     resolve(oss.put('static/pages/' + Date.now() + '.html', htmlPath))
                 })
             })
         })
         .then(urlObj => { // 跳转至线上地址
+            let host = 'https://fe-static.htd.cn/'
             let dir = path.join(__dirname, '../public/uploads/')
-            removeAll(dir)
-            ctx.redirect(urlObj.url)
+            // removeAll(dir)
+            ctx.redirect(host + urlObj.name)
         })
         ctx.body = 'success'
     })

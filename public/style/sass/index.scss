@@ -10,6 +10,7 @@ form {
     border: 1px solid #ddd;
     position: relative;
     background-color: transparent;
+    border-radius: 5px;
     &.change {
         &::after {
             content: '已选择，等待上传';
@@ -22,12 +23,12 @@ form {
     height: 100px;
     line-height: 100px;
     text-align: center;
-    color: #fff;
+    color: #666;
     font-size: 16px;
     position: absolute;
     top: 0;
     left: 0;
-    background-color:rgb(75, 100, 5);
+    background-color:#fff;
 }
 .submit {
     display: inline-block;
