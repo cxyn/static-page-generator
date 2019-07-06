@@ -43,6 +43,7 @@
     "gulp-plumber": "^1.2.1",
     "gulp-sass": "^4.0.2",
     "gulp-uglify": "^3.0.2",
+    "multiparty": "^4.2.1",
     "nodemon": "^1.18.10"
   },
   "bugs": {
