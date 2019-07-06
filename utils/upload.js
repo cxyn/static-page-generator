@@ -1,6 +1,7 @@
 const multer = require('koa-multer')
 const path = require('path')
 const fs = require('fs')
+const currentDate = require("../utils/getCurrentDate")
 function mkdirsSync(dir) {
   if (fs.existsSync(dir)) {
     return true;
@@ -12,9 +13,10 @@ function mkdirsSync(dir) {
   }
 }
 const storage = multer.diskStorage({
-  destination:'public/uploads/' + String(new Date().getFullYear()) + String(new Date().getMonth() + 1) + String(new Date().getDate()),
+  destination:'public/uploads/' + currentDate,
   filename(ctx,file,cb){
-    let todayDir = String(new Date().getFullYear()) + String(new Date().getMonth() + 1) + String(new Date().getDate())
+    let dateObj = new Date()
+    let todayDir = dateObj.getFullYear().toString() + (dateObj.getMonth() + 1).toString().padStart(2, '0') + dateObj.getDate().toString().padStart(2, '0')
     let upDir = path.join(__dirname, '../public/')
     let upDirStr =  upDir + 'uploads/'
     let isUpDirExists = fs.existsSync(upDirStr)
