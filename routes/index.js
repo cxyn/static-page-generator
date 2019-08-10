@@ -8,6 +8,8 @@ module.exports = (router) => {
     const request = require('request')
     const multiparty = require('multiparty')
     const currentDate = require("../utils/getCurrentDate")
+    const moment = require('moment')
+
     router.get('/', async (ctx, next) => {
         await ctx.render('index', {
 
@@ -190,11 +192,11 @@ module.exports = (router) => {
         // console.log(JSON.stringify(ctx.req.file));
         let imgExt = path.extname(ctx.req.file.filename) //获取图片后缀
         let pageInfo = { //后期页面配置取值
-            title: '标题',
-            keywords: '关键词',
-            description: '描述'
+            title: '',
+            keywords: '',
+            description: ''
         }
-        let baseHight = 500                   //每块切图的默认基准高度
+        let baseHight = 800                   //每块切图的默认基准高度
         let width = 0, height = 0             //设计稿的宽高
         let img = path.join(__dirname, '../') + ctx.req.file.path  //当前切图的主体
         let fileName = ctx.req.file.fileName
@@ -248,21 +250,13 @@ module.exports = (router) => {
         ctx.body = 'success'
     })
     router.post('/upload1', async (ctx, next) => {
-        let error = {
-            status: 500,
-            msg: '',
-            result: null
-        }
-        let success = {
-            status: 200,
-            msg: '',
-            result: null
-        }
         function uploadImg() {
             let data = {}
             return new Promise((resolve, reject) => {
                 let form = new multiparty.Form({ uploadDir: './public/uploads/advance' })
                 form.parse(ctx.req, function (err, fields, files) {
+                    console.log('fields', fields.pageInfo)
+                    console.log('files', files)
                     if (err) {
                         data = {
                             msg: "解析失败",
@@ -271,18 +265,12 @@ module.exports = (router) => {
                         };
                         resolve(data)
                     } else {
-                        // console.log(fields);//除文件外的其他附带信息
-                        // console.log("files = ",files);//文件信息
                         if (files !== undefined && files !== {} && files.file !== undefined) {
-                            // console.log(files.file);
                             if (files.file.length > 0) {
                                 let filename = files.file[0].path;
                                 let filetype = files.file[0].headers['content-type'];
                                 let realname = files.file[0].originalFilename;
-                                // console.log("filename = ",filename);
-                                // console.log("filetype = ",filetype);
-                                // console.log("realname = ",realname);
-                                if (filetype.indexOf("image/") >= 0) {
+                                if (filetype.indexOf("image/") != -1) {
                                     data = {
                                         msg: "上传成功",
                                         result: files.file[0].path.replace('public', ''),
@@ -307,8 +295,8 @@ module.exports = (router) => {
                             resolve(data)
                         }
                     }
-                });
-            });
+                })
+            })
         }
         await uploadImg().then(r => {
             if (r.code === 0) {

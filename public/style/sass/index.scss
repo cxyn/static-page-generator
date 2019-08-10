@@ -1,3 +1,7 @@
+.box {
+    width: 1200px;
+    margin: auto;
+}
 form {
     width: 200px;
     margin: 150px auto;
@@ -87,4 +91,80 @@ div.image-decorator {
 	display : inline-block;
 	padding : 5px 5px 5px 5px;
 	position: relative;
+}
+
+
+
+
+
+
+
+.previewTitle {
+    margin-top: 50px;
+    margin-left: 348px;
+}
+.preview {
+    width: 500px;
+    height: 300px;
+    overflow: scroll;
+    border: 1px solid #ddd;
+    margin: 20px auto;
+    img {
+        width: 100%;
+    }
+}
+.fileBox {
+    text-align: center;
+    span {
+        font-size: 14px;
+        font-weight: bold;
+        color: #f60;
+        cursor: pointer;
+    }
+    img {
+        width: 200px;
+        cursor: pointer;
+    }
+    .imgFile {
+        display: none;
+    }
+}
+.pageInfo {
+    padding-left: 300px;
+    @at-root .formItem {
+        height: 40px;
+        line-height: 40px;
+        display: flex;
+        margin-top: 20px;
+        label {
+            width: 120px;
+            text-align: right;
+        }
+        input {
+            width: 300px;
+            height: 38px;
+            margin-left: 20px;
+            padding: 0 5px;
+        }
+    }
+}
+.pageType {
+    text-align: center;
+    margin: 20px;
+    span {
+        margin: 0 20px 0 5px;
+        font-size: 14px;
+    }
+}
+.generateBtn {
+    display: block;
+    width: 100px;
+    height: 35px;
+    background-color: #f60;
+    color: #fff;
+    font-size: 14px;
+    border-color: transparent;
+    border-radius: 3px;
+    margin: 20px auto;
+    cursor: pointer;
 }

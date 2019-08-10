@@ -9,14 +9,44 @@
     <script src='js/lib/layer/layer.js'></script>
 </head>
 <body>
-	<div class="uploadBox">
-        <!-- <input type="file" name="file" id="uploadBtn"> -->
+	<!-- <div class="uploadBox">
+        <input type="file" name="file" id="uploadBtn">
         <form id="form" action="/upload" method="POST"  enctype="multipart/form-data">         
             <input class="file" type="file" name="file"><br>
             <br>
             <input type="submit" class="submit submit1">
         </form>
+    </div> -->
+    <div class="box">
+        <h3 class="previewTitle">预览区：</h3>
+        <div class="preview">
+            <img src="" alt="">
+        </div>
+        <div class="fileBox">
+            <span>+ 点击添加图片 +</span>
+            <input class="imgFile" type="file" name="file">
+        </div>
+        <div class="pageType">
+            <input type="radio" name="pageType" id="pc" value="pc" checked><span>PC页面</span>
+            <input type="radio" name="pageType" id="mobile" value="mobile"><span>移动端页面</span>
+        </div>
+        <div class="pageInfo">
+                <div class="formItem">
+                    <label for="">切块基准高度(px)：</label><input type="text" class="baseHeight" placeholder="请输入切块基准高度(px)">
+                </div>
+                <div class="formItem">
+                    <label for="">页面title：</label><input type="text" class="pageTitle" placeholder="请输入页面title">
+                </div>
+                <div class="formItem">
+                    <label for="">meta keywords：</label><input type="text" class="pageKeywords" placeholder="请输入页面关键词">
+                </div>
+                <div class="formItem">
+                    <label for="">meta description：</label><input type="text" class="pageDesc" placeholder="请输入页面描述">
+                </div>
+        </div>
+        <button class="generateBtn">生成页面</button>
     </div>
+    
     <script src='js/main.js'></script>
 </body>
 </html>

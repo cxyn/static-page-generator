@@ -13,9 +13,13 @@ const cors = require('koa2-cors')
 const path = require('path')
 const views = require('koa-views')
 const static = require('koa-static')
+const { loggerMiddleware } = require('./middlewares/logger')
+const { errorHandler, responseHandler } = require('./middlewares/response')
 // const query = require('./config/db')
 const port = process.env.PORT || 3003
 require('dotenv').config()
+app.use(loggerMiddleware)
+app.use(errorHandler)
 app.use(static('./public'))
 app.use(views(path.join(__dirname, './views'), {
     extension: 'ejs'
@@ -27,4 +31,5 @@ app.use(bodyParser())
 require('./routes')(router)
 
 app.use(router.routes()).use(router.allowedMethods())
+app.use(responseHandler)
 app.listen(port, () => console.log(`服务器运行中, 监听端口号: ${port}`))
