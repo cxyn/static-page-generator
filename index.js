@@ -18,7 +18,7 @@ const { errorHandler, responseHandler } = require('./middlewares/response')
 // const query = require('./config/db')
 const port = process.env.PORT || 3003
 require('dotenv').config()
-app.use(loggerMiddleware)
+// app.use(loggerMiddleware)
 app.use(errorHandler)
 app.use(static('./public'))
 app.use(views(path.join(__dirname, './views'), {

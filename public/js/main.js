@@ -1,4 +1,5 @@
 $(function () {
+    let linkInfor = [];
     $("#uploadBtn").on("change",function () {
         let data = new FormData()
         console.log(this)
@@ -92,7 +93,50 @@ $(function () {
             return;
         }
         let imgUrl = URL.createObjectURL(img);
+        let index = 0;
         $('.preview img').attr('src', imgUrl);
+        $('.preview img').selectAreas({
+            minSize: [50, 50],
+            onChanged: function(event, id, areas) {
+                let arr = $(this).selectAreas('relativeAreas');
+                let ratio = document.querySelector('#previewImg').naturalWidth / 500;
+                let vw_ratio = document.querySelector('#previewImg').naturalWidth / 100
+                console.log(ratio)
+                if(areas.length === $('.link').length + 1) {
+                    index ++;
+                    let _link = '<div class="formItem">'+
+                    '                <label for="">第' + index + '块区域的链接：</label><input type="text" class="link" placeholder="请输入链接地址" value="https://">'+
+                    '            </div>';
+                    $('.linkBox').append(_link)
+                }
+                
+                let newArr = arr.map((item) => {
+                    let model = {
+                        id: item.id,
+                        x: (item.x * ratio / vw_ratio) + 'vw' ,
+                        y: (item.y * ratio / vw_ratio) + 'vw',
+                        z: item.z,
+                        width: (item.width * ratio /vw_ratio) + 'vw',
+                        height: (item.height * ratio /vw_ratio) + 'vw'
+                    }
+                    return model
+                });
+                linkInfor = newArr;
+                // let newArr = arr.map((item) => {
+                //     let model = {
+                //         id: item.id,
+                //         x: item.x - 360,
+                //         y: item.y,
+                //         z: item.z,
+                //         width: item.width,
+                //         height: item.height
+                //     }
+                //     return model
+                // })
+            },
+            width: 500,
+            areas: []
+        });
     })
     $('.generateBtn').on('click', function(e) {
         if(!$('.imgFile').val()) {
@@ -108,7 +152,7 @@ $(function () {
             title: $.trim($('.pageTitle').val()),
             keywords: $.trim($('.pageKeywords').val()),
             type: $('.pageType :radio:checked').val(),
-            descriptipn: $.trim($('.pageDescriptipn').val())
+            description: $.trim($('.pageDesc').val())
         }
         if(!pageInfo.baseHeight) {
             layer.open({
@@ -129,8 +173,22 @@ $(function () {
             })
             return;
         }
+        $('.link').each(function(linkIndex) {
+            var value = $.trim($(this).val());
+            linkInfor.forEach(function(linkPosition, positionIndex) {
+                if(linkIndex === positionIndex) {
+                    linkPosition.link = value;
+                }
+            })
+        });
+        console.log(linkInfor);
+        return;
         data.append("file", document.querySelector('.imgFile').files[0]);
-        data.append("pageInfo", pageInfo);
+        data.append("baseHeight", pageInfo.baseHeight);
+        data.append("title", pageInfo.title);
+        data.append("keywords", pageInfo.keywords);
+        data.append("description", pageInfo.description);
+        data.append("type", pageInfo.type);
         $.ajax({
             url: "/upload1",
             type: "POST",

@@ -251,62 +251,26 @@ module.exports = (router) => {
     })
     router.post('/upload1', async (ctx, next) => {
         function uploadImg() {
-            let data = {}
             return new Promise((resolve, reject) => {
                 let form = new multiparty.Form({ uploadDir: './public/uploads/advance' })
                 form.parse(ctx.req, function (err, fields, files) {
-                    console.log('fields', fields.pageInfo)
-                    console.log('files', files)
+                    console.log(JSON.stringify(fields))
+                    let pageInfo = fields.pageInfo
                     if (err) {
-                        data = {
-                            msg: "解析失败",
-                            code: 0,
-                            err: false
-                        };
-                        resolve(data)
+                        reject()
                     } else {
-                        if (files !== undefined && files !== {} && files.file !== undefined) {
-                            if (files.file.length > 0) {
-                                let filename = files.file[0].path;
-                                let filetype = files.file[0].headers['content-type'];
-                                let realname = files.file[0].originalFilename;
-                                if (filetype.indexOf("image/") != -1) {
-                                    data = {
-                                        msg: "上传成功",
-                                        result: files.file[0].path.replace('public', ''),
-                                        code: 1
-                                    };
-                                    resolve(data);
-                                } else {
-                                    data = {
-                                        msg: "上传失败",
-                                        err: 0
-                                    }
-                                    fs.unlinkSync(filename)//删除非图片文件
-                                    resolve(data)
-                                }
-                            }
-                        } else {
-                            data = {
-                                msg: "未上传文件",
-                                code: 0,
-                                err: false
-                            };
-                            resolve(data)
+                        if(files && files.file && files.file.length) {
+                            let localImg = files.file[0].path.replace('public', '')
+                            resolve(localImg)
                         }
                     }
                 })
             })
         }
-        await uploadImg().then(r => {
-            if (r.code === 0) {
-                error["msg"] = r.msg
-                ctx.body = error
-            } else {
-                success["result"] = r.result
-                success["msg"] = r.msg
-                ctx.body = success
-            }
-        })
+        await uploadImg().then(img => {
+            ctx.body = img
+        }).catch(err => {
+            ctx.body = err
+        }) 
     })
 }

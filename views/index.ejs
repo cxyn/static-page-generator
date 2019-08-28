@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style/css/index.css">
     <script src='js/lib/jquery-1.8.3.js'></script>
     <script src='js/lib/layer/layer.js'></script>
-</head>
+    <script src='js/lib/jquery.selectareas.js'></script>
+    <link rel="stylesheet" href="js/lib/resources/jquery.selectareas.css">
 <body>
 	<!-- <div class="uploadBox">
         <input type="file" name="file" id="uploadBtn">
@@ -20,7 +21,7 @@
     <div class="box">
         <h3 class="previewTitle">预览区：</h3>
         <div class="preview">
-            <img src="" alt="">
+            <img src="" alt="" id="previewImg">
         </div>
         <div class="fileBox">
             <span>+ 点击添加图片 +</span>
@@ -42,6 +43,8 @@
                 </div>
                 <div class="formItem">
                     <label for="">meta description：</label><input type="text" class="pageDesc" placeholder="请输入页面描述">
+                </div>
+                <div class="linkBox">
                 </div>
         </div>
         <button class="generateBtn">生成页面</button>
