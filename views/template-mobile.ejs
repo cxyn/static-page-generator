@@ -2,15 +2,15 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title><%=pageInfo.title %></title>
+<title><%=obj.title %></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="Content-Type" content="multipart/form-data;">
 <meta http-equiv="Cache-Control" content="no-cache">
-<meta name="description" content="<%=pageInfo.description %>">
-<meta name="keywords" content="<%=pageInfo.keywords %>">
+<meta name="description" content="<%=obj.description %>">
+<meta name="keywords" content="<%=obj.keywords %>">
 <style>        
     * {            
         margin: 0;            
@@ -21,11 +21,21 @@
         width: 100%;            
         height: auto;        
     }    
+    body {
+        position: relative;
+    }
+    a {
+        position: absolute;
+    }
 </style>
 </head>
 <body>
-        <% urlArray.forEach(function(url){ %>
-            <img src="<%=url.url %>">
+        <% obj.fileArrayOnline.forEach(function(url){ %>
+            <img src="<%=url %>">
         <% }); %>
+        <% obj.linkInfor.forEach(function(link){ %>
+            <a href="<%=link.link %>" style="width: <%=link.width %>;height: <%=link.height %>;top: <%=link.y %>;left: <%=link.x %>"></a>
+        <% }); %>
+        
 </body>
 </html>

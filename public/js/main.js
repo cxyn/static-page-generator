@@ -1,6 +1,6 @@
 $(function () {
     let linkInfor = [];
-    $("#uploadBtn").on("change",function () {
+/*     $("#uploadBtn").on("change",function () {
         let data = new FormData()
         console.log(this)
         data.append("file", document.getElementById('uploadBtn').files[0])
@@ -65,7 +65,7 @@ $(function () {
             }
         })
 
-    })
+    }) */
 
 
 
@@ -101,7 +101,6 @@ $(function () {
                 let arr = $(this).selectAreas('relativeAreas');
                 let ratio = document.querySelector('#previewImg').naturalWidth / 500;
                 let vw_ratio = document.querySelector('#previewImg').naturalWidth / 100
-                console.log(ratio)
                 if(areas.length === $('.link').length + 1) {
                     index ++;
                     let _link = '<div class="formItem">'+
@@ -117,7 +116,8 @@ $(function () {
                         y: (item.y * ratio / vw_ratio) + 'vw',
                         z: item.z,
                         width: (item.width * ratio /vw_ratio) + 'vw',
-                        height: (item.height * ratio /vw_ratio) + 'vw'
+                        height: (item.height * ratio /vw_ratio) + 'vw',
+                        pxHeight: item.height * ratio
                     }
                     return model
                 });
@@ -173,6 +173,7 @@ $(function () {
             })
             return;
         }
+        var layerIndex = layer.load();
         $('.link').each(function(linkIndex) {
             var value = $.trim($(this).val());
             linkInfor.forEach(function(linkPosition, positionIndex) {
@@ -181,14 +182,15 @@ $(function () {
                 }
             })
         });
-        console.log(linkInfor);
-        return;
         data.append("file", document.querySelector('.imgFile').files[0]);
         data.append("baseHeight", pageInfo.baseHeight);
         data.append("title", pageInfo.title);
         data.append("keywords", pageInfo.keywords);
         data.append("description", pageInfo.description);
         data.append("type", pageInfo.type);
+        data.append("linkInfor", JSON.stringify(linkInfor));
+        data.append("naturalWidth", document.querySelector('#previewImg').naturalWidth);
+        data.append("naturalHeight", document.querySelector('#previewImg').naturalHeight);
         $.ajax({
             url: "/upload1",
             type: "POST",
@@ -196,7 +198,12 @@ $(function () {
             contentType: false,
             data: data,
             success : function(data){
-                console.log(data)
+                if(data.code) {
+                    layer.alert('页面地址：' + data.data.url, {icon: 1});
+                }
+            },
+            complete: function() {
+                layer.close(layerIndex);
             }
         })
     })

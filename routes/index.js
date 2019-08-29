@@ -9,6 +9,7 @@ module.exports = (router) => {
     const multiparty = require('multiparty')
     const currentDate = require("../utils/getCurrentDate")
     const moment = require('moment')
+    const uuidv1 = require('uuid/v1')
 
     router.get('/', async (ctx, next) => {
         await ctx.render('index', {
@@ -249,28 +250,270 @@ module.exports = (router) => {
             })
         ctx.body = 'success'
     })
-    router.post('/upload1', async (ctx, next) => {
-        function uploadImg() {
-            return new Promise((resolve, reject) => {
-                let form = new multiparty.Form({ uploadDir: './public/uploads/advance' })
-                form.parse(ctx.req, function (err, fields, files) {
-                    console.log(JSON.stringify(fields))
-                    let pageInfo = fields.pageInfo
-                    if (err) {
-                        reject()
-                    } else {
-                        if(files && files.file && files.file.length) {
-                            let localImg = files.file[0].path.replace('public', '')
-                            resolve(localImg)
-                        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * 计算每张切图的宽高
+     *
+     * @param {Object} obj 图片尺寸 - 宽度(obj.naturalWidth) & 高度(obj.naturalHeight) & 切图的基础高度值(obj.baseHight)
+     * @return {Object} 含有heightArray的对象
+     */
+    async function m_storeSize(obj) {
+        console.log('第二步：存储尺寸')
+        let width = obj.naturalWidth
+        let height = obj.naturalHeight
+        let baseHeight = obj.baseHeight
+        let areaCount = Math.ceil(height / baseHeight) //计算出的切图数量
+        let lastHeight = height % baseHeight           //最后一块切图的高度
+        obj.heightArray = []                          //存储每张切图的高度
+        let i = 0
+        for (i; i < areaCount; i++) {
+            if (lastHeight) {
+                if (i === areaCount - 1) {
+                    obj.heightArray.push(lastHeight)
+                } else {
+                    obj.heightArray.push(baseHeight)
+                }
+            } else {
+                obj.heightArray.push(baseHeight)
+            }
+        }
+        return await obj
+    }
+
+    /**
+     * 计算切图坐标
+     *
+     * @param {Object} 每张切图的高度数组(obj.heightArr) & 切图宽度(obj.naturalWidth) 
+     * @return {Array} 含有positionArray 切图坐标数组的对象
+     */
+    function m_cropPosition(obj) {
+        return new Promise((resolve, reject) => {
+            obj.positionArray = []
+            let imgWidth = obj.naturalWidth
+            obj.heightArray.reduce((prev, curr, idx) => {
+                obj.positionArray.push({
+                    size: {
+                        width: imgWidth,
+                        height: curr
+                    },
+                    coordinate: {
+                        x: 0,
+                        y: prev
                     }
                 })
+                return parseInt(curr) + parseInt(prev)
+            }, 0)
+            console.log('第三步：存储位置信息')
+            resolve(obj)
+        })
+    }
+    /**
+     * 切图api调用，累加实现计算坐标位置
+     *
+     * @param {Object} obj imgObject 切图主体 & positionArr 切图坐标数组
+     * @return {String} promise 切图文件夹
+     */
+    function m_crop(obj) {
+        let imgObject = obj.img
+        let positionArr = obj.positionArray
+        let imgExt  = path.extname(obj.img)
+        let now = Date.now()
+        let cropDir = path.join(__dirname, '../public/uploads/') + 'page-' + now + '/'
+        obj.cropDir = cropDir
+        console.log(obj.cropDir)
+        try {
+            fs.statSync(cropDir)
+            console.log('切图目录已存在')
+        } catch (e) {
+            fs.mkdir(cropDir, (err) => {
+                if (err) {
+                    console.log(err)
+                    return
+                }
+                console.log('创建切图目录成功')
             })
         }
-        await uploadImg().then(img => {
-            ctx.body = img
-        }).catch(err => {
-            ctx.body = err
+        let promises = positionArr.map((postion, idx) => {
+            return new Promise((resolve, reject) => {
+                gm(imgObject)
+                    .crop(postion.size.width, postion.size.height, postion.coordinate.x, postion.coordinate.y)
+                    .write(cropDir + 'img-' + (idx + 1).toString().padStart(2, '0') + imgExt, (err, out) => {
+                        if (err) {
+                            reject(err)
+                        }
+                        resolve(obj)
+                    })
+            })
+        })
+        console.log('第四步：切图')
+        return Promise.all(promises)
+    }
+
+    /**
+     * 递归遍历文件夹读取图片
+     *
+     * @param {String} dir 切图文件夹路径
+     * @param {Array} fileArr 切图数组
+     * @return {Array} fileArr 切图数组
+     */
+    function m_readDir(obj) {
+        console.log('第五步：读取切图')
+        let dir = obj.cropDir
+        if (!dir) return
+        return new Promise((resolve, reject) => {
+            var fileArr = fileArr || []
+            let files = fs.readdirSync(dir)
+            let ext = ''
+            for (let i of files) {
+                let fileName = dir + i
+                ext = path.extname(fileName)
+                if (ext.match('jpg') || ext.match('png')) {
+                    fileArr.push(fileName)
+                }
+            }
+            let newFileArray = fileArr.map(item => {
+                return item.match(/^.+public(\/.+)$/)[1]
+            })
+            obj.fileArray = newFileArray
+            resolve(obj)
+        })
+    }
+
+    /**
+     * 递归遍历文件夹读取图片和html
+     *
+     * @param {String} dir 切图文件夹路径
+     * @param {Array} fileArr 切图数组
+     * @return {Array} fileArr 切图数组
+     */
+    function m_readDir2(obj) {
+        let dir = obj.cropDir
+        if (!dir) return
+        return new Promise((resolve, reject) => {
+            var fileArr = fileArr || []
+            let files = fs.readdirSync(dir)
+            for (let i of files) {
+                let fileName = dir + i
+                fileArr.push(fileName)
+            }
+            resolve(fileArr)
+        })
+    }
+
+    /**
+     * 循环上传阿里云
+     *
+     * @param {Array} imgArray 切图文件夹路径
+     * @return {String} 上传后的图片url
+     */
+    function m_uploadToOss(fileList) {
+        let uuid = uuidv1()
+        let promises = fileList.map((img, index) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(img), img)
+                    resolve(result)
+                } catch (err) {
+                    reject(err)
+                }
+            })
+
+        })
+        return Promise.all(promises)
+    }
+    function uploadImg(ctx) {
+        return new Promise((resolve, reject) => {
+            let form = new multiparty.Form({ uploadDir: './public/uploads/advance' })
+            form.parse(ctx.req, function (err, fields, files) {
+                if (err) {
+                    reject()
+                } else {
+                    if(files && files.file && files.file.length) {
+                        let img = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
+                        let imgExt = path.extname(img) //获取图片后缀
+                        let fileName = path.basename(img)//获取图片名
+                        mobile.reqInfo = {
+                            linkInfor: JSON.parse(fields.linkInfor[0]),
+                            type: fields.type[0],
+                            baseHeight: fields.baseHeight[0],
+                            title: fields.title[0],
+                            keywords: fields.keywords[0],
+                            description: fields.description[0],
+                            naturalWidth: fields.naturalWidth[0],
+                            naturalHeight: fields.naturalHeight[0]
+                        }
+                        resolve(img)
+                    }
+                }
+            })
+        })
+    }
+    var mobile = mobile || {}
+    mobile.uuid = uuidv1()
+    router.post('/upload1', async (ctx, next) => {  
+        await uploadImg(ctx).then(img => {
+            mobile.reqInfo.img = img
+            return m_storeSize(mobile.reqInfo)
+        }).then(obj => {
+            return m_cropPosition(obj)
+        }).then(obj => {
+            return m_crop(obj)
+        }).then(obj => {
+            return m_readDir(obj[0])
+        }).then(obj => {
+            obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
+            obj.fileArrayOnline = obj.fileArray.map(item => {
+                var arr = item.split('/')
+                return arr[arr.length - 1]
+            })
+            console.log(mobile.reqInfo)
+            router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
+                await ctx.render('template-mobile', {
+                    obj
+                })
+            })
+        }).then(() => { // 生成静态html并上传至阿里云
+            return new Promise((resolve, reject) => {
+                let pageName = Date.now() + '.html'
+                let currentDir = mobile.reqInfo.fileArray[0].match(/^(.+)img-.+$/)[1]
+                let htmlPath = path.join(__dirname, '../public/' + currentDir, pageName)
+                let writeStream = fs.createWriteStream(htmlPath)
+                request(mobile.reqInfo.pageUrl).pipe(writeStream)
+                writeStream.on('finish', () => { // 写入成功
+                    resolve(ctx.origin + currentDir + pageName)
+                })
+            })
+        }).then(url => {
+            return m_readDir2(mobile.reqInfo)
+        }).then(fileList => {
+            return m_uploadToOss(fileList)
+        }).then(list => { // 跳转至线上地址
+            let host = 'https://fe-static.htd.cn/'
+            ctx.body = {
+                code: 1,
+                message: 'success',
+                data: {
+                    url: host + list[0].name
+                }
+            }
+        }).catch(e => {
+            ctx.body = {
+                code: 0,
+                message: 'fail',
+                data: e
+            }
         }) 
     })
 }
