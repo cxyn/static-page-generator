@@ -1,7 +1,90 @@
 .box {
     width: 1200px;
     margin: auto;
+    @at-root .uploadLeft {
+        float: left;
+        width: 600px;
+        @at-root .previewTitle {
+            margin-top: 20px;
+        }
+        @at-root .preview {
+            width: 500px;
+            height: 500px;
+            overflow: scroll;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            img {
+                width: 100%;
+            }
+        }
+        @at-root .fileBox {
+            text-align: center;
+            width: 500px;
+            span {
+                font-size: 14px;
+                font-weight: bold;
+                color: #f60;
+                cursor: pointer;
+            }
+            img {
+                width: 200px;
+                cursor: pointer;
+            }
+            .imgFile {
+                display: none;
+            }
+        }
+    }
+    @at-root .uploadRight {
+        float: left;
+        width: 600px;
+        @at-root .pageInfo {
+            padding-top: 20px;
+            @at-root .formItem {
+                line-height: 40px;
+                label {
+                    display: block;
+                }
+                input {
+                    display: block;
+                    width: 300px;
+                    height: 38px;
+                    padding: 0 5px;
+                    border: 1px solid #999;
+                    border-radius: 3px;
+                    &.on {
+                        border-color: #f70;
+                    }
+                }
+            }
+        }
+        @at-root .pageType {
+            margin: 20px 0;
+            span {
+                margin: 0 20px 0 5px;
+                font-size: 14px;
+            }
+        }
+        @at-root .generateBtn {
+            display: block;
+            width: 100px;
+            height: 35px;
+            background-color: #f60;
+            color: #fff;
+            font-size: 14px;
+            border-color: transparent;
+            border-radius: 3px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+    }
 }
+
+
+
+
+
+
 form {
     width: 200px;
     margin: 150px auto;
@@ -82,7 +165,6 @@ form {
         }
     }
 }
-
 div.image-decorator {
 	background-color : #ffffff;
 	border : 1px solid #c8c8c8;
@@ -99,77 +181,4 @@ div.image-decorator {
 
 
 
-.previewTitle {
-    margin-top: 50px;
-    margin-left: 348px;
-}
-.preview {
-    width: 500px;
-    height: 300px;
-    overflow: scroll;
-    border: 1px solid #ddd;
-    margin: 20px auto;
-    img {
-        width: 100%;
-    }
-}
-.fileBox {
-    text-align: center;
-    span {
-        font-size: 14px;
-        font-weight: bold;
-        color: #f60;
-        cursor: pointer;
-    }
-    img {
-        width: 200px;
-        cursor: pointer;
-    }
-    .imgFile {
-        display: none;
-    }
-}
-.pageInfo {
-    padding-left: 300px;
-    @at-root .formItem {
-        height: 40px;
-        line-height: 40px;
-        display: flex;
-        margin-top: 20px;
-        label {
-            width: 120px;
-            text-align: right;
-        }
-        input {
-            width: 300px;
-            height: 38px;
-            margin-left: 20px;
-            padding: 0 5px;
-            border: 1px solid #999;
-            border-radius: 3px;
-            &.on {
-                border-color: #f70;
-            }
-        }
-    }
-}
-.pageType {
-    text-align: center;
-    margin: 20px;
-    span {
-        margin: 0 20px 0 5px;
-        font-size: 14px;
-    }
-}
-.generateBtn {
-    display: block;
-    width: 100px;
-    height: 35px;
-    background-color: #f60;
-    color: #fff;
-    font-size: 14px;
-    border-color: transparent;
-    border-radius: 3px;
-    margin: 20px auto;
-    cursor: pointer;
-}
+
