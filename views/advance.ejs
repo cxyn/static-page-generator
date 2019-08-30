@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <title>静态页面生成器高级版</title>
+    <link rel="stylesheet" href="style/css/reset.css">
+    <link rel="stylesheet" href="style/css/index.css">
+	<link href="js/lib/resources/jquery.selectareas.css" media="screen" rel="stylesheet" type="text/css" />
+	<!--[if lte IE 8]><link href="js/lib/resources/jquery.selectareas.ie8.css" media="screen" rel="stylesheet" type="text/css" /> <![endif]-->
+    <script src='js/lib/jquery-1.8.3.js'></script>
+    <script src='js/lib/layer/layer.js'></script>
+    <script src='js/lib/jquery.selectareas.js'></script>
+</head>
+<body>
+	<div class="uploadBox">
+        <form id="form" enctype="multipart/form-data">         
+            <input class="file" type="file" name="file" id="file"><br>
+            <br>
+            <a href="" class="submit submit2">上传</a>
+        </form>
+    </div>
+    <div class="imgBox">
+        <img src="uploads/advance/9NGVoSoh37f_onvIbPfpsGSZ.png" alt="">
+        <div class="cover left"></div>
+        <div class="cover right"></div>
+    </div>
+    
+    <script src='js/main.js'></script>
+    <script>
+        $(document).ready(function () {
+				$('.imgBox img').selectAreas({
+					minSize: [50, 50],
+					onChanged: function(event, id, areas) {
+						let arr = $(this).selectAreas('relativeAreas');
+						console.log(arr)
+						let newArr = arr.map((item) => {
+							let model = {
+								id: item.id,
+								x: item.x - 180,
+								y: item.y,
+								z: item.z,
+								width: item.width,
+								height: item.height
+							}
+							return model
+						})
+						console.log(newArr)
+					},
+					width: 960,
+					areas: []
+				});
+			});
+    </script>
+</body>
+</html>
