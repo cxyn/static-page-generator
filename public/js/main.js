@@ -103,7 +103,7 @@ $(function () {
                 let vw_ratio = document.querySelector('#previewImg').naturalWidth / 100
                 if(areas.length === $('.link').length + 1) {
                     index ++;
-                    let _link = '<div class="formItem">'+
+                    let _link = '<div class="formItem linkItem' + id + '">'+
                     '                <label for="">第' + index + '块区域的链接：</label><input type="text" class="link" placeholder="请输入链接地址" value="https://">'+
                     '            </div>';
                     $('.linkBox').append(_link)
@@ -122,6 +122,8 @@ $(function () {
                     return model
                 });
                 linkInfor = newArr;
+                $('.linkBox :text').removeClass('on').blur();
+                $('.linkItem' + id).find(':text').addClass('on').focus();
                 // let newArr = arr.map((item) => {
                 //     let model = {
                 //         id: item.id,
@@ -133,6 +135,9 @@ $(function () {
                 //     }
                 //     return model
                 // })
+            },
+            onDelete: function(event, id, areas) {
+                $('.linkItem' + id).remove();
             },
             width: 500,
             areas: []

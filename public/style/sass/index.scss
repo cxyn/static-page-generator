@@ -145,6 +145,11 @@ div.image-decorator {
             height: 38px;
             margin-left: 20px;
             padding: 0 5px;
+            border: 1px solid #999;
+            border-radius: 3px;
+            &.on {
+                border-color: #f70;
+            }
         }
     }
 }

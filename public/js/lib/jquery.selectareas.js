@@ -426,6 +426,7 @@
                 });
                 $btDelete.remove();
                 parent._remove(id);
+                fireEvent("onDelete");
                 fireEvent("changed");
             },
             getElementOffset = function (object) {
@@ -571,7 +572,8 @@
                 overlayOpacity: 0.5,
                 areas: [],
                 onChanging: null,
-                onChanged: null
+                onChanged: null,
+                onDelete: null
             };
 
         this.options = $.extend(defaultOptions, customOptions);
@@ -596,6 +598,9 @@
         }
         if (this.options.onChanged) {
             this.$image.on("changed", this.options.onChanged);
+        }
+        if (this.options.onDelete) {
+            this.$image.on("onDelete", this.options.onDelete);
         }
         if (this.options.onLoaded) {
             this.$image.on("loaded", this.options.onLoaded);
