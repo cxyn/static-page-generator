@@ -10,17 +10,9 @@
     <script src='js/lib/jquery.selectareas.js'></script>
     <link rel="stylesheet" href="js/lib/resources/jquery.selectareas.css">
 <body>
-	<!-- <div class="uploadBox">
-        <input type="file" name="file" id="uploadBtn">
-        <form id="form" action="/upload" method="POST"  enctype="multipart/form-data">         
-            <input class="file" type="file" name="file"><br>
-            <br>
-            <input type="submit" class="submit submit1">
-        </form>
-    </div> -->
     <div class="box clearfix">
         <div class="uploadLeft">
-            <h3 class="previewTitle">预览区：</h3>
+            <h3 class="commonTitle">预览区：</h3>
             <div class="preview">
                 <img src="" alt="" id="previewImg">
             </div>
@@ -30,6 +22,7 @@
             </div>
         </div>
         <div class="uploadRight">
+            <h3 class="commonTitle">设置区：</h3>
             <div class="pageInfo">
                 <div class="formItem">
                     <label for="">切块基准高度(px)：</label><input type="text" class="baseHeight" placeholder="请输入切块基准高度(px)" value="500">
@@ -50,7 +43,13 @@
                 <input type="radio" name="pageType" id="pc" value="pc" disabled><span>PC页面</span>
                 <input type="radio" name="pageType" id="mobile" value="mobile" checked><span>移动端页面</span>
             </div>
-            <button class="generateBtn">生成页面</button>
+            <div class="actionBox">
+                <button class="generateBtn">生成页面</button> 
+                <button class="fillUrl hide">填充url</button>
+                <button class="uploadExcel">上传Excel</button>
+            </div>
+            <input type="file" class="excel hide" id="excel">
+            
         </div>
 
     </div>

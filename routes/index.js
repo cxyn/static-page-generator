@@ -10,14 +10,10 @@ module.exports = (router) => {
     const currentDate = require("../utils/getCurrentDate")
     const moment = require('moment')
     const uuidv1 = require('uuid/v1')
+    const xlsx = require('node-xlsx')
 
     router.get('/', async (ctx, next) => {
         await ctx.render('index', {
-
-        })
-    })
-    router.get('/advance', async (ctx, next) => {
-        await ctx.render('advance', {
 
         })
     })
@@ -262,7 +258,62 @@ module.exports = (router) => {
 
 
 
-
+    /**
+     * 上传图片到服务器
+     *
+     * @param {Object} ctx koa上下文
+     * @return {String} 服务器上的图片路径
+     */
+    function uploadImg(ctx) {
+        return new Promise((resolve, reject) => {
+            let form = new multiparty.Form({ uploadDir: './public/uploads/advance' })
+            form.parse(ctx.req, function (err, fields, files) {
+                if (err) {
+                    reject()
+                } else {
+                    if(files && files.file && files.file.length) {
+                        let img = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
+                        let imgExt = path.extname(img) //获取图片后缀
+                        let fileName = path.basename(img)//获取图片名
+                        mobile.reqInfo = {
+                            linkInfor: JSON.parse(fields.linkInfor[0]),
+                            type: fields.type[0],
+                            baseHeight: fields.baseHeight[0],
+                            title: fields.title[0],
+                            keywords: fields.keywords[0],
+                            description: fields.description[0],
+                            naturalWidth: fields.naturalWidth[0],
+                            naturalHeight: fields.naturalHeight[0]
+                        }
+                        resolve(img)
+                    }
+                }
+            })
+        })
+    }
+    /**
+     * 上传excel到服务器
+     *
+     * @param {Object} ctx koa上下文
+     * @return {String} 服务器上的图片路径
+     */
+    function uploadExcel(ctx) {
+        return new Promise((resolve, reject) => {
+            let form = new multiparty.Form({ uploadDir: './public/uploads/docs' })
+            form.parse(ctx.req, function (err, fields, files) {
+                if (err) {
+                    reject()
+                } else {
+                    if(files && files.file && files.file.length) {
+                        let excel = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
+                        let excelExt = path.extname(excel) //获取excel后缀
+                        let fileName = path.basename(excel)//获取excel名
+                        resolve(excel)
+                    }
+                }
+            })
+        })
+    }
     /**
      * 计算每张切图的宽高
      *
@@ -392,6 +443,22 @@ module.exports = (router) => {
     }
 
     /**
+     * 递归遍历文件夹读取图片
+     *
+     * @param {String} xlsxFile xlsx文件夹路径
+     * @return {Array} urlList url数组
+     */
+    function readXlsx(xlsxFile) {
+        let obj = xlsx.parse(xlsxFile);
+        let urlList = []
+        for(let url of obj[0].data) {
+            urlList.push(url[0])
+        }
+        console.log(urlList)
+        return urlList
+    }
+
+    /**
      * 递归遍历文件夹读取图片和html
      *
      * @param {String} dir 切图文件夹路径
@@ -420,10 +487,10 @@ module.exports = (router) => {
      */
     function m_uploadToOss(fileList) {
         let uuid = uuidv1()
-        let promises = fileList.map((img, index) => {
+        let promises = fileList.map((file, index) => {
             return new Promise((resolve, reject) => {
                 try {
-                    var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(img), img)
+                    var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
                     resolve(result)
                 } catch (err) {
                     reject(err)
@@ -433,36 +500,11 @@ module.exports = (router) => {
         })
         return Promise.all(promises)
     }
-    function uploadImg(ctx) {
-        return new Promise((resolve, reject) => {
-            let form = new multiparty.Form({ uploadDir: './public/uploads/advance' })
-            form.parse(ctx.req, function (err, fields, files) {
-                if (err) {
-                    reject()
-                } else {
-                    if(files && files.file && files.file.length) {
-                        let img = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
-                        let imgExt = path.extname(img) //获取图片后缀
-                        let fileName = path.basename(img)//获取图片名
-                        mobile.reqInfo = {
-                            linkInfor: JSON.parse(fields.linkInfor[0]),
-                            type: fields.type[0],
-                            baseHeight: fields.baseHeight[0],
-                            title: fields.title[0],
-                            keywords: fields.keywords[0],
-                            description: fields.description[0],
-                            naturalWidth: fields.naturalWidth[0],
-                            naturalHeight: fields.naturalHeight[0]
-                        }
-                        resolve(img)
-                    }
-                }
-            })
-        })
-    }
     var mobile = mobile || {}
     mobile.uuid = uuidv1()
-    router.post('/upload1', async (ctx, next) => {  
+
+    // 生成页面接口
+    router.post('/generatorPage', async (ctx, next) => {  
         await uploadImg(ctx).then(img => {
             mobile.reqInfo.img = img
             return m_storeSize(mobile.reqInfo)
@@ -478,8 +520,8 @@ module.exports = (router) => {
                 var arr = item.split('/')
                 return arr[arr.length - 1]
             })
-            console.log(mobile.reqInfo)
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
+                console.log(obj)
                 await ctx.render('template-mobile', {
                     obj
                 })
@@ -515,5 +557,35 @@ module.exports = (router) => {
                 data: e
             }
         }) 
+    })
+
+    // 读取excel接口
+    router.get('/readXlsx', async (ctx, next) => {
+        let urlList = readXlsx(ctx.querystring)
+        ctx.body = {
+            code: 1,
+            message: 'success',
+            data: urlList
+        }
+    })
+
+    // 上传excel接口
+    router.post('/uploadLocal', async (ctx, next) => {
+        await uploadExcel(ctx).then(excelPath => {
+            ctx.body = {
+                code: 1,
+                message: 'success',
+                data: {
+                    url: excelPath
+                }
+            }
+        }).catch(e => {
+            ctx.body = {
+                code: 0,
+                message: 'fail',
+                data: e
+            }
+        })
+
     })
 }
