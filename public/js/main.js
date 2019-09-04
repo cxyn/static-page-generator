@@ -1,76 +1,6 @@
 $(function () {
+    var page = page || {};
     let linkInfor = [];
-/*     $("#uploadBtn").on("change",function () {
-        let data = new FormData()
-        console.log(this)
-        data.append("file", document.getElementById('uploadBtn').files[0])
-        $.ajax({
-            url: '/upload',
-            type: 'POST',
-            contentType: 'application/x-www-form-urlencoded',
-            processData:false,
-            mimeType: "multipart/form-data",
-            data: data,
-        })
-        .done(function() {
-            console.log("success")
-        })
-        .fail(function() {
-            console.log("error")
-        })
-        .always(function() {
-            console.log("complete")
-        })
-        
-    })
-
-    $('.file').change(function(e) {
-        $(this).addClass('change')
-    })
-    $('.submit1').on('click', () => {
-        if(!$('.file').val()) {
-            layer.open({
-                title: '提示'
-                ,content: '请先选择图片'
-            })
-            return false
-        }
-        layer.load(1, {
-            shade: [0.5,'#999']
-        })
-        $('#form').submit()
-    })
-    $('.submit2').on('click', (e) => {
-        e.preventDefault()
-        if(!$('.file').val()) {
-            layer.open({
-                title: '提示'
-                ,content: '请先选择图片'
-            })
-            return false
-        }
-
-        let data = new FormData()
-        data.append("file", document.getElementById('file').files[0])
-
-        $.ajax({
-            url : "/upload1",
-            type : "POST",
-            processData: false,
-            contentType: false,
-            data : data,
-            success : function(data){
-                console.log(data)
-                $('.imgBox img').attr('src', data.result)
-            }
-        })
-
-    }) */
-
-
-
-
-
     $('.fileBox span').on('click', function(e) {
         $('.imgFile').click();
     })
@@ -104,7 +34,7 @@ $(function () {
                 if(areas.length === $('.link').length + 1) {
                     index ++;
                     let _link = '<div class="formItem linkItem' + id + '">'+
-                    '                <label for="">第' + index + '块区域的链接：</label><input type="text" class="link" placeholder="请输入链接地址" value="https://">'+
+                    '                <label for="">第' + index + '块区域的链接：</label><input type="text" class="link" placeholder="请输入链接地址" value="">'+
                     '            </div>';
                     $('.linkBox').append(_link)
                 }
@@ -143,6 +73,78 @@ $(function () {
             areas: []
         });
     })
+    // 点击填充数据
+    $('.uploadExcel').on('click', function() {
+        $('.excel').click();   
+    })
+    $('.excel').on('change', function(e) {
+        let type = this.files[0].type;
+        console.log(type.includes('sheet'));
+        if (!type.includes('excel') && !type.includes('sheet')) {
+            layer.alert('请上传 .xls 或者 .xlsx 文件', {
+                icon: 0
+              });
+            return;
+        }
+        let data = new FormData();
+        data.append('file', this.files[0]);
+        $.ajax({
+            url: "/uploadLocal",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: data,
+            cache: false,
+            success : function(data){
+                console.log(data)
+                if (data.code) {
+                    $('.uploadExcel').addClass('hide');
+                    $('.fillUrl').removeClass('hide');
+                    page.excelPath = data.data.url;
+                } else {
+                    layer.alert(data.message, {
+                        icon: 0
+                    });
+                }
+            }
+        })
+    })
+    
+    // 点击填充数据
+    $('.fillUrl').on('click', function() {
+        $.ajax({
+            url: "/readXlsx",
+            type: "GET",
+            data: page.excelPath,
+            success : function(data){
+                if (data.code) {
+                    console.log(data)
+                    if ($('.select-areas-background-area').length) {
+                        if ($('.select-areas-background-area').length > data.data.length) {
+                            layer.alert('选区数量多于excel表里的url数量', {
+                                icon: 1
+                            });
+                       } else if ($('.select-areas-background-area').length < data.data.length){
+                            layer.alert('选区数量少于excel表里的url数量', {
+                                icon: 1
+                            });
+                       } else {
+                           $('.link').each(function(index, item) {
+                               $(item).val(data.data[index]);
+                           })
+                       }
+                    } else {
+                        layer.alert('请上传预览图片，如若已上传请框选相应数量的链接区块', {
+                            icon: 0
+                        });
+                    }
+                   
+                }
+            }
+        })    
+    })
+
+    // 点击生成页面
     $('.generateBtn').on('click', function(e) {
         if(!$('.imgFile').val()) {
             layer.open({
@@ -197,14 +199,21 @@ $(function () {
         data.append("naturalWidth", document.querySelector('#previewImg').naturalWidth);
         data.append("naturalHeight", document.querySelector('#previewImg').naturalHeight);
         $.ajax({
-            url: "/upload1",
+            url: "/generatorPage",
             type: "POST",
             processData: false,
             contentType: false,
             data: data,
+            cache: false,
             success : function(data){
                 if(data.code) {
-                    layer.alert('页面地址：' + data.data.url, {icon: 1});
+                    layer.alert('页面生成成功，点击【确定】跳转到活动页面', {
+                        icon: 1,
+                        yes: function(index) {
+                            layer.close(index);
+                            window.open(data.data.url, '_blank');
+                        }
+                    });
                 }
             },
             complete: function() {
