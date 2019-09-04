@@ -11,6 +11,7 @@ module.exports = (router) => {
     const moment = require('moment')
     const uuidv1 = require('uuid/v1')
     const xlsx = require('node-xlsx')
+    const os = require('os')
 
     router.get('/', async (ctx, next) => {
         await ctx.render('index', {
@@ -381,9 +382,8 @@ module.exports = (router) => {
         let positionArr = obj.positionArray
         let imgExt  = path.extname(obj.img)
         let now = Date.now()
-        let cropDir = path.join(__dirname, '../public/uploads/') + 'page-' + now + '/'
+        let cropDir = path.join(__dirname, '../public/uploads/') + 'page-' + now + path.sep
         obj.cropDir = cropDir
-        console.log(obj.cropDir)
         try {
             fs.statSync(cropDir)
             console.log('切图目录已存在')
@@ -423,6 +423,7 @@ module.exports = (router) => {
         console.log('第五步：读取切图')
         let dir = obj.cropDir
         if (!dir) return
+        
         return new Promise((resolve, reject) => {
             var fileArr = fileArr || []
             let files = fs.readdirSync(dir)
@@ -434,8 +435,10 @@ module.exports = (router) => {
                     fileArr.push(fileName)
                 }
             }
+            let pattern =/^.+public(\/.+)$/
             let newFileArray = fileArr.map(item => {
-                return item.match(/^.+public(\/.+)$/)[1]
+                let newItem = item.split(path.sep).join('/');
+                return newItem.match(pattern)[1]
             })
             obj.fileArray = newFileArray
             resolve(obj)
@@ -454,7 +457,6 @@ module.exports = (router) => {
         for(let url of obj[0].data) {
             urlList.push(url[0])
         }
-        console.log(urlList)
         return urlList
     }
 
@@ -493,6 +495,7 @@ module.exports = (router) => {
                     var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
                     resolve(result)
                 } catch (err) {
+                    console.log(err)
                     reject(err)
                 }
             })
@@ -504,7 +507,7 @@ module.exports = (router) => {
     mobile.uuid = uuidv1()
 
     // 生成页面接口
-    router.post('/generatorPage', async (ctx, next) => {  
+    router.post('/generatorPage', async (ctx, next) => {
         await uploadImg(ctx).then(img => {
             mobile.reqInfo.img = img
             return m_storeSize(mobile.reqInfo)
@@ -521,7 +524,6 @@ module.exports = (router) => {
                 return arr[arr.length - 1]
             })
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
-                console.log(obj)
                 await ctx.render('template-mobile', {
                     obj
                 })
