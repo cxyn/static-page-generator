@@ -1,12 +1,7 @@
 $(function () {
     var page = page || {};
     let linkInfor = [];
-    $('.fileBox span').on('click', function(e) {
-        $('.imgFile').click();
-    })
-
-    $('.imgFile').change(function(e) {
-        let img = e.target.files[0];
+    page.showImg = function(img) {
         let type = img.type.toLowerCase();
         if(type.indexOf("image/") == -1) {
             layer.open({
@@ -72,11 +67,56 @@ $(function () {
             width: 500,
             areas: []
         });
-    })
+    }
+    $('.preview').on('click', function(e) {
+        if (!$('.imgFile').val()) {
+            $('.imgFile').click();
+        }
+    });
+
+    $('.imgFile').change(function(e) {
+        let img = e.target.files[0];
+        page.showImg(img)
+    });
+
+    $(document).on({ 
+        dragleave: function(e) {
+            e.preventDefault(); 
+        }, 
+        drop: function(e) {
+            e.preventDefault(); 
+        }, 
+        dragenter: function(e) {
+            e.preventDefault(); 
+        }, 
+        dragover: function(e) {
+            e.preventDefault(); 
+        } 
+    }); 
+    $('.preview').on({
+        drop: function(e) {
+            let img = e.originalEvent.dataTransfer.files[0];
+            $('.previewTps').addClass('hide');
+            page.showImg(img)
+        },
+        dragover: function(e) {
+            $('.previewTps').css('color', '#f70');
+        },
+        dragleave: function(e) {
+            $('.previewTps').css('color', '#aaa');
+        }
+    });
+
+    $(document).on('blur', '.link', function(e) {
+        $(this).removeClass('on');
+    });
+
     // 点击填充数据
     $('.uploadExcel').on('click', function() {
         $('.excel').click();   
-    })
+    });
+
+    // 上传excel
     $('.excel').on('change', function(e) {
         let type = this.files[0].type;
         console.log(type.includes('sheet'));
@@ -108,7 +148,7 @@ $(function () {
                 }
             }
         })
-    })
+    });
     
     // 点击填充数据
     $('.fillUrl').on('click', function() {
@@ -142,7 +182,7 @@ $(function () {
                 }
             }
         })    
-    })
+    });
 
     // 点击生成页面
     $('.generateBtn').on('click', function(e) {
@@ -220,5 +260,5 @@ $(function () {
                 layer.close(layerIndex);
             }
         })
-    })
+    });
 })

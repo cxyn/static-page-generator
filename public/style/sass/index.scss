@@ -1,3 +1,6 @@
+body {
+    background-color: #eaeaea;
+}
 .box {
     .hide {
         display: none;
@@ -9,35 +12,41 @@
         @at-root .commonTitle {
             margin-top: 20px;
             font-size: 20px;
+            color: #333;
         }
         @at-root .preview {
             width: 500px;
             height: 500px;
+            background-color: #fff;
             overflow-y: scroll;
             overflow-x: hidden;
             border: 1px solid #ddd;
             margin: 20px 0;
             border-radius: 3px;
+            position: relative;
+            &::-webkit-scrollbar{
+                width: 0; 
+            }
             img {
                 width: 100%;
             }
+            @at-root .previewTps {
+                position: absolute;
+                text-align: center;
+                width: 100%;
+                padding-top: 200px;
+                color: #aaa;
+                h4 {
+                    font-size: 18px;
+                }
+                p {
+                    font-size: 14px;
+                    line-height: 3;
+                }
+            }
         }
-        @at-root .fileBox {
-            text-align: center;
-            width: 500px;
-            span {
-                font-size: 14px;
-                font-weight: bold;
-                color: #f60;
-                cursor: pointer;
-            }
-            img {
-                width: 200px;
-                cursor: pointer;
-            }
-            .imgFile {
-                display: none;
-            }
+        .imgFile {
+            display: none;
         }
     }
     @at-root .uploadRight {
@@ -51,6 +60,7 @@
             overflow-y: scroll;
             border: 1px solid #ddd;
             border-radius: 3px;
+            background-color: #fff;
             @at-root .formItem {
                 line-height: 40px;
                 label {
@@ -72,7 +82,7 @@
         @at-root .pageType {
             margin: 20px 0;
             padding-left: 1px;
-            span {
+            label {
                 margin: 0 20px 0 5px;
                 font-size: 14px;
             }

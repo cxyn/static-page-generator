@@ -15,11 +15,12 @@
             <h3 class="commonTitle">预览区：</h3>
             <div class="preview">
                 <img src="" alt="" id="previewImg">
+                <div class="previewTps">
+                    <h4>拖放预览或点击区域选取图片</h4>
+                    <p>请拖拽图片文件到此预览区域或者点击此区域在弹窗里选择图片文件</p>
+                </div>
             </div>
-            <div class="fileBox">
-                <span>+ 点击添加图片 +</span>
-                <input class="imgFile" type="file" name="file">
-            </div>
+            <input class="imgFile" type="file" name="file">
         </div>
         <div class="uploadRight">
             <h3 class="commonTitle">设置区：</h3>
@@ -40,8 +41,8 @@
                 </div>
             </div>
             <div class="pageType">
-                <input type="radio" name="pageType" id="pc" value="pc" disabled><span>PC页面</span>
-                <input type="radio" name="pageType" id="mobile" value="mobile" checked><span>移动端页面</span>
+                <input type="radio" name="pageType" id="mobile" value="mobile" checked><label for="mobile">移动端页面</label>
+                <input type="radio" name="pageType" id="pc" value="pc"><label for="">PC页面</label>
             </div>
             <div class="actionBox">
                 <button class="generateBtn">生成页面</button> 
