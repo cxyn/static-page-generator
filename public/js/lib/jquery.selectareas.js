@@ -426,6 +426,7 @@
                 });
                 $btDelete.remove();
                 parent._remove(id);
+                fireEvent("onDelete");
                 fireEvent("changed");
             },
             getElementOffset = function (object) {
@@ -562,6 +563,7 @@
                 allowSelect: true,
                 allowDelete: true,
                 allowNudge: true,
+                allowResizeWithKeybord: true,
                 aspectRatio: 0,
                 minSize: [0, 0],
                 maxSize: [0, 0],
@@ -571,7 +573,8 @@
                 overlayOpacity: 0.5,
                 areas: [],
                 onChanging: null,
-                onChanged: null
+                onChanged: null,
+                onDelete: null
             };
 
         this.options = $.extend(defaultOptions, customOptions);
@@ -596,6 +599,9 @@
         }
         if (this.options.onChanged) {
             this.$image.on("changed", this.options.onChanged);
+        }
+        if (this.options.onDelete) {
+            this.$image.on("onDelete", this.options.onDelete);
         }
         if (this.options.onLoaded) {
             this.$image.on("loaded", this.options.onLoaded);
@@ -672,6 +678,38 @@
                         selectedArea.nudge(move);
                     }
                 }
+            });
+        }
+
+        if (this.options.allowResizeWithKeybord) {
+            $('html').keydown(function (e) { // 通过组合键来改变上下左右尺寸
+                if (e.altKey && e.which == 37) {
+                    console.log('组合键')
+                }
+                // var codes = {
+                //         37: "l",
+                //         38: "u",
+                //         39: "r",
+                //         40: "d"
+                //     },
+                //     direction = codes[e.which],
+                //     selectedArea;
+
+                // if (direction) {
+                //     that._eachArea(function (area) {
+                        
+                //             console.log(area.getData())
+                //         if (area.getData().z === 100) {
+                //             selectedArea = area;
+                //             return false;
+                //         }
+                //     });
+                //     if (selectedArea) {
+                //         var move = {};
+                //         move[direction] = 1;
+                //         selectedArea.nudge(move);
+                //     }
+                // }
             });
         }
     };
