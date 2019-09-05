@@ -30,11 +30,13 @@
 </style>
 </head>
 <body>
-        <% obj.fileArrayOnline.forEach(function(url){ %>
+        <% obj.fileArrayOnline.forEach(function(url, index){ %>
+            <% if(index > 0) { %>
             <img src="<%=url %>">
+            <% } %>
         <% }); %>
         <% obj.linkInfor.forEach(function(link){ %>
-            <a href="<%=link.link %>" style="width: <%=link.width %>;height: <%=link.height %>;top: <%=link.y %>;left: <%=link.x %>"></a>
+            <a href="<%=link.link %>" style="width: <%=link.width %>; height: <%=link.height %>; top: <%=link.y %>; left: <%=link.x %>"></a>
         <% }); %>
         
 </body>

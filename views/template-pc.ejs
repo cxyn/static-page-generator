@@ -17,12 +17,26 @@
         display: block;            
         width: 100%;            
         height: auto;        
-    }    
+    }
+    body {
+        background: url('<%=obj.bgImg %>')
+    }
+    .container {
+        width: 1200px;
+        margin: 0 auto;
+        position: relative;
+    }
 </style>
 </head>
 <body>
-    <% obj.fileArrayOnline.forEach(function(url){ %>
-        <img src="<%=url %>">
-    <% }); %>
+    <div class="container">
+        <% obj.fileArrayOnline.forEach(function(url){ %>
+            <img src="<%=url %>">
+        <% }); %>
+        <% obj.linkInfor.forEach(function(link){ %>
+            <a href="<%=link.link %>" style="width: <%=link.width %>; height: <%=link.height %>; top: <%=link.y %>;left : <%=link.x %>"></a>
+        <% }); %>
+    </div>
+    
 </body>
 </html>

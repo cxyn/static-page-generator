@@ -36,9 +36,8 @@ module.exports = (router) => {
                     reject()
                 } else {
                     if(files && files.file && files.file.length) {
-                        let img = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
-                        let imgExt = path.extname(img) //获取图片后缀
-                        let fileName = path.basename(img)//获取图片名
+                        //let img = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
+                        let img = files.file[0].path
                         mobile.reqInfo = {
                             linkInfor: JSON.parse(fields.linkInfor[0]),
                             type: fields.type[0],
@@ -116,9 +115,10 @@ module.exports = (router) => {
      * @return {Array} 含有positionArray 切图坐标数组的对象
      */
     function m_cropPosition(obj) {
+        let coordinate_x = obj.type === 'pc'? 360 : 0
+        let imgWidth = obj.type === 'pc'? 1200 : obj.naturalWidth
         return new Promise((resolve, reject) => {
             obj.positionArray = []
-            let imgWidth = obj.naturalWidth
             obj.heightArray.reduce((prev, curr, idx) => {
                 obj.positionArray.push({
                     size: {
@@ -126,7 +126,7 @@ module.exports = (router) => {
                         height: curr
                     },
                     coordinate: {
-                        x: 0,
+                        x: coordinate_x,
                         y: prev
                     }
                 })
@@ -154,8 +154,9 @@ module.exports = (router) => {
             return new Promise((resolve, reject) => {
                 gm(imgObject)
                     .crop(postion.size.width, postion.size.height, postion.coordinate.x, postion.coordinate.y)
-                    .write(cropDir + 'img-' + (idx + 1).toString().padStart(2, '0') + imgExt, (err, out) => {
+                    .write(cropDir + '/img-' + (idx + 1).toString().padStart(2, '0') + imgExt, (err, out) => {
                         if (err) {
+                            console.log(err)
                             reject(err)
                         }
                         resolve(obj)
@@ -174,7 +175,13 @@ module.exports = (router) => {
      * @return {Array} fileArr 切图数组
      */
     function m_readDir(obj) {
-        console.log('第五步：读取切图')
+
+        let extname = path.extname(obj.img)
+        if (obj.type === 'pc') {
+            fs.createReadStream(obj.img).pipe(fs.createWriteStream(`${obj.cropDir}background${extname}`))
+            obj.bgImg = `background${extname}`
+        }
+
         let dir = obj.cropDir
         if (!dir) return
         
@@ -185,7 +192,7 @@ module.exports = (router) => {
             for (let i of files) {
                 let fileName = dir + i
                 ext = path.extname(fileName)
-                if (ext.match('jpg') || ext.match('png')) {
+                if (ext.match('jpg') || ext.match('png') || ext.match('html')) {
                     fileArr.push(fileName)
                 }
             }
@@ -195,12 +202,13 @@ module.exports = (router) => {
                 return newItem.match(pattern)[1]
             })
             obj.fileArray = newFileArray
+            console.log('第 4 步：读取本地文件')
             resolve(obj)
         })
     }
 
     /**
-     * 递归遍历文件夹读取图片
+     * 读取excel文件
      *
      * @param {String} xlsxFile xlsx文件夹路径
      * @return {Array} urlList url数组
@@ -277,22 +285,19 @@ module.exports = (router) => {
                 var arr = item.split('/')
                 return arr[arr.length - 1]
             })
-            console.log(obj)
-            let template = ''
-            if (obj.type === 'mobile') {
-                template = 'template-mobile'
-            } else if (obj.type === 'pc') {
-                template = 'template-pc'
+            if (obj.type === 'pc') {
+                obj.fileArrayOnline.shift()
             }
+            
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
-                await ctx.render(template, {
+                await ctx.render(`template-${obj.type}`, {
                     obj
                 })
             })
         }).then(() => { // 生成静态html
             return new Promise((resolve, reject) => {
                 let pageName = Date.now() + '.html'
-                let currentDir = mobile.reqInfo.fileArray[0].match(/^(.+)img-.+$/)[1]
+                let currentDir = mobile.reqInfo.fileArray[1].match(/^(.+)img-.+$/)[1]
                 let htmlPath = path.join(__dirname, '../public/' + currentDir, pageName)
                 let writeStream = fs.createWriteStream(htmlPath)
                 request(mobile.reqInfo.pageUrl).pipe(writeStream)

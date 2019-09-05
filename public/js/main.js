@@ -35,31 +35,35 @@ $(function () {
                 }
                 
                 let newArr = arr.map((item) => {
-                    let model = {
-                        id: item.id,
-                        x: (item.x * ratio / vw_ratio) + 'vw' ,
-                        y: (item.y * ratio / vw_ratio) + 'vw',
-                        z: item.z,
-                        width: (item.width * ratio /vw_ratio) + 'vw',
-                        height: (item.height * ratio /vw_ratio) + 'vw',
-                        pxHeight: item.height * ratio
+                    let model = null;
+                    let radioValue = $('.pageType :radio:checked').val();
+                    if (radioValue === 'mobile') {
+                        model = {
+                            id: item.id,
+                            x: (item.x * ratio / vw_ratio) + 'vw' ,
+                            y: (item.y * ratio / vw_ratio) + 'vw',
+                            z: item.z,
+                            width: (item.width * ratio / vw_ratio) + 'vw',
+                            height: (item.height * ratio / vw_ratio) + 'vw',
+                            pxHeight: item.height * ratio
+                        }
+                    } else if (radioValue === 'pc') {
+                        model = {
+                            id: item.id,
+                            x: (item.x * ratio - 360) + 'px',
+                            y: (item.y * ratio) + 'px',
+                            z: item.z,
+                            width: (item.width * ratio) + 'px',
+                            height: (item.height * ratio) + 'px',
+                            pxHeight: item.height * ratio
+                        }
                     }
+                    
                     return model
                 });
                 linkInfor = newArr;
                 $('.linkBox :text').removeClass('on').blur();
                 $('.linkItem' + id).find(':text').addClass('on').focus();
-                // let newArr = arr.map((item) => {
-                //     let model = {
-                //         id: item.id,
-                //         x: item.x - 360,
-                //         y: item.y,
-                //         z: item.z,
-                //         width: item.width,
-                //         height: item.height
-                //     }
-                //     return model
-                // })
             },
             onDelete: function(event, id, areas) {
                 $('.linkItem' + id).remove();
