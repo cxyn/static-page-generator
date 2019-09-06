@@ -17,6 +17,7 @@ $(function () {
             })
             return;
         }
+        $('.previewTps').addClass('hide');
         let imgUrl = URL.createObjectURL(img);
         let index = 0;
         $('.preview img').attr('src', imgUrl);
@@ -37,7 +38,7 @@ $(function () {
                 let newArr = arr.map((item) => {
                     let model = null;
                     let radioValue = $('.pageType :radio:checked').val();
-                    if (radioValue === 'mobile') {
+                    if (radioValue == 'mobile') {
                         model = {
                             id: item.id,
                             x: (item.x * ratio / vw_ratio) + 'vw' ,
@@ -47,7 +48,7 @@ $(function () {
                             height: (item.height * ratio / vw_ratio) + 'vw',
                             pxHeight: item.height * ratio
                         }
-                    } else if (radioValue === 'pc') {
+                    } else if (radioValue == 'pc') {
                         model = {
                             id: item.id,
                             x: (item.x * ratio - 360) + 'px',
@@ -58,7 +59,6 @@ $(function () {
                             pxHeight: item.height * ratio
                         }
                     }
-                    
                     return model
                 });
                 linkInfor = newArr;
