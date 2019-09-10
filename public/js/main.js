@@ -73,7 +73,7 @@ $(function () {
         });
     }
     $('.preview').on('click', function(e) {
-        if (!$('.imgFile').val()) {
+        if (!$('.preview img').attr('src')) {
             $('.imgFile').click();
         }
     });
