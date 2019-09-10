@@ -190,7 +190,7 @@ $(function () {
 
     // 点击生成页面
     $('.generateBtn').on('click', function(e) {
-        if(!$('.imgFile').val()) {
+        if(!$('.preview img').attr('src')) {
             layer.open({
                 title: '提示'
                 ,content: '请先选择图片'

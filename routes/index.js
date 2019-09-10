@@ -2,7 +2,7 @@ module.exports = (router) => {
     const fs = require('fs')
     const gm = require('gm')
     const path = require('path')
-    const upload = require("../utils/upload")
+    // const upload = require("../utils/upload")
     const removeAll = require("../utils/removeAll")
     const oss = require("../utils/oss")
     const request = require('request')
