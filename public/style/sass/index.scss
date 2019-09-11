@@ -13,6 +13,12 @@ body {
             margin-top: 20px;
             font-size: 20px;
             color: #333;
+            .iconfont {
+                font-size: 26px;
+                margin-right: 5px;
+                color: #f70;
+                vertical-align: -2px;
+            }
         }
         @at-root .preview {
             width: 500px;
@@ -34,14 +40,18 @@ body {
                 position: absolute;
                 text-align: center;
                 width: 100%;
-                padding-top: 200px;
-                color: #aaa;
+                padding-top: 160px;
+                color: #ccc;
+                .iconfont {
+                    font-size: 50px;
+                }
                 h4 {
                     font-size: 18px;
+                    margin-top: 40px;
                 }
                 p {
-                    font-size: 14px;
-                    line-height: 3;
+                    font-size: 12px;
+                    line-height: 4;
                 }
             }
         }
@@ -66,6 +76,11 @@ body {
                 label {
                     display: block;
                 }
+                .iconfont {
+                    font-size: 14px;
+                    color: #f70;
+                    margin-right: 3px;
+                }
                 input {
                     display: block;
                     width: 500px;
@@ -82,10 +97,32 @@ body {
         @at-root .pageType {
             margin: 20px 0;
             padding-left: 1px;
-            label {
-                margin: 0 20px 0 5px;
-                font-size: 14px;
+            display: flex;
+            @at-root .radioBox {
+                position: relative;
+                padding-left: 15px;
+                input {
+                    display: none;
+                    &:checked + label::before {
+                        content: "\e60f";
+                        color: #f70;
+                    }
+                }
+                
+                label {
+                    margin: 0 20px 0 5px;
+                    font-size: 14px;
+                    &::before{
+                        font-family: "iconfont" !important;
+                        content: "\e610";
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        color: #999;
+                    }
+                }
             }
+            
         }
         @at-root .actionBox {
             display: flex;

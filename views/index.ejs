@@ -9,13 +9,16 @@
     <script src='js/lib/layer/layer.js'></script>
     <script src='js/lib/jquery.selectareas.js'></script>
     <link rel="stylesheet" href="js/lib/resources/jquery.selectareas.css">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1402434_9injpx8dger.css">
+    
 <body>
     <div class="box clearfix">
         <div class="uploadLeft">
-            <h3 class="commonTitle">预览区：</h3>
+            <h3 class="commonTitle"><i class="iconfont icon-preview"></i>预览区：</h3>
             <div class="preview">
                 <img src="" alt="" id="previewImg">
                 <div class="previewTps">
+                    <i class="iconfont icon-upload"></i>
                     <h4>拖放预览或点击区域选取图片</h4>
                     <p>请拖拽图片文件到此预览区域或者点击此区域在弹窗里选择图片文件</p>
                 </div>
@@ -23,26 +26,32 @@
             <input class="imgFile" type="file" name="file">
         </div>
         <div class="uploadRight">
-            <h3 class="commonTitle">设置区：</h3>
+            <h3 class="commonTitle"><i class="iconfont icon-settings"></i>设置区：</h3>
             <div class="pageInfo">
                 <div class="formItem">
-                    <label for="">切块基准高度(px)：</label><input type="text" class="baseHeight" placeholder="请输入切块基准高度(px)" value="500">
+                    <label for=""><i class="iconfont icon-height"></i>切块基准高度(px)：</label><input type="text" class="baseHeight" placeholder="请输入切块基准高度(px)" value="500">
                 </div>
                 <div class="formItem">
-                    <label for="">页面title：</label><input type="text" class="pageTitle" placeholder="请输入页面title" value="网页标题">
+                    <label for=""><i class="iconfont icon-title"></i>页面 Title：</label><input type="text" class="pageTitle" placeholder="请输入页面title" value="">
                 </div>
                 <div class="formItem">
-                    <label for="">meta keywords：</label><input type="text" class="pageKeywords" placeholder="请输入页面关键词" value="关键字">
+                    <label for=""><i class="iconfont icon-keyword"></i>Meta Keywords：</label><input type="text" class="pageKeywords" placeholder="请输入页面关键词" value="">
                 </div>
                 <div class="formItem">
-                    <label for="">meta description：</label><input type="text" class="pageDesc" placeholder="请输入页面描述" value="描述">
+                    <label for=""><i class="iconfont icon-description"></i>Meta Description：</label><input type="text" class="pageDesc" placeholder="请输入页面描述" value="">
                 </div>
                 <div class="linkBox">
                 </div>
             </div>
             <div class="pageType">
-                <input type="radio" name="pageType" id="mobile" value="mobile" checked><label for="mobile">移动端页面</label>
-                <input type="radio" name="pageType" id="pc" value="pc"><label for="">PC页面</label>
+                <div class="radioBox">
+                    <input type="radio" name="pageType" id="mobile" value="mobile" checked>
+                    <label for="mobile">移动端页面</label>
+                </div>
+                <div class="radioBox"> 
+                    <input type="radio" name="pageType" id="pc" value="pc">
+                    <label for="pc">PC页面</label>
+                </div>
             </div>
             <div class="actionBox">
                 <button class="generateBtn">生成页面</button> 
