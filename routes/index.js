@@ -8,10 +8,8 @@ module.exports = (router) => {
     const request = require('request')
     const multiparty = require('multiparty')
     const currentDate = require("../utils/getCurrentDate")
-    const moment = require('moment')
     const uuidv1 = require('uuid/v1')
     const xlsx = require('node-xlsx')
-    const os = require('os')
     const makeDir = require('../utils/makeDir')
 
     router.get('/', async (ctx, next) => {
@@ -71,7 +69,6 @@ module.exports = (router) => {
                     reject()
                 } else {
                     if(files && files.file && files.file.length) {
-                        // let excel = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
                         let excel = files.file[0].path
                         let excelExt = path.extname(excel) //获取excel后缀
                         let fileName = path.basename(excel)//获取excel名
@@ -298,9 +295,10 @@ module.exports = (router) => {
                 })
             })
         }).then(() => { // 生成静态html
+            console.log('生成静态html')
             return new Promise((resolve, reject) => {
                 let pageName = Date.now() + '.html'
-                let currentDir = mobile.reqInfo.fileArray[0].match(/^(.+)img-.+$/)[1]
+                let currentDir = mobile.reqInfo.fileArray[1].match(/^(.+)img-.+$/)[1]
                 let htmlPath = path.join(__dirname, '../public/' + currentDir, pageName)
                 let writeStream = fs.createWriteStream(htmlPath)
                 request(mobile.reqInfo.pageUrl).pipe(writeStream)
