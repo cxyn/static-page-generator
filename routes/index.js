@@ -46,6 +46,7 @@ module.exports = (router) => {
                             naturalWidth: fields.naturalWidth[0],
                             naturalHeight: fields.naturalHeight[0]
                         }
+                        console.log(mobile.reqInfo)
                         resolve(img)
                     }
                 }
@@ -295,7 +296,6 @@ module.exports = (router) => {
                 })
             })
         }).then(() => { // 生成静态html
-            console.log('生成静态html')
             return new Promise((resolve, reject) => {
                 let pageName = Date.now() + '.html'
                 let currentDir = mobile.reqInfo.fileArray[1].match(/^(.+)img-.+$/)[1]

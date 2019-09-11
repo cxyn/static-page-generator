@@ -18,6 +18,7 @@
         width: 100%;            
         height: auto;        
     }
+    <% if(obj.linkInfor.length) { %>
     body {
         background: url("<%=obj.bgImg %>") no-repeat center;
     }
@@ -29,9 +30,11 @@
     a {
         position: absolute;
     }
+    <% } %>
 </style>
 </head>
 <body>
+    <% if(obj.linkInfor.length) { %>
     <div class="container">
         <% obj.fileArrayOnline.forEach(function(url){ %>
             <img src="<%=url %>">
@@ -40,6 +43,10 @@
             <a href="<%=link.link %>" style="width:<%=link.width %>;height:<%=link.height %>;top:<%=link.y %>;left:<%=link.x %>"></a>
         <% }); %>
     </div>
-    
+    <% } else { %>
+        <% obj.fileArrayOnline.forEach(function(url){ %>
+            <img src="<%=url %>">
+        <% }); %>
+    <% } %>    
 </body>
 </html>
