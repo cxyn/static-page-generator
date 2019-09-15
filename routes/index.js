@@ -11,6 +11,9 @@ module.exports = (router) => {
     const uuidv1 = require('uuid/v1')
     const xlsx = require('node-xlsx')
     const makeDir = require('../utils/makeDir')
+    const imagemin = require('imagemin')
+    const imageminJpegtran = require('imagemin-jpegtran')
+    const imageminPngquant = require('imagemin-pngquant')
 
     router.get('/', async (ctx, next) => {
         await ctx.render('index', {
@@ -19,7 +22,7 @@ module.exports = (router) => {
     })
 
     /**
-     * 上传图片到服务器
+     * @description 上传图片到服务器
      *
      * @param {Object} ctx koa上下文
      * @return {String} 服务器上的图片路径
@@ -54,7 +57,7 @@ module.exports = (router) => {
         })
     }
     /**
-     * 上传excel到服务器
+     * @description 上传excel到服务器
      *
      * @param {Object} ctx koa上下文
      * @return {String} 服务器上的图片路径
@@ -80,7 +83,7 @@ module.exports = (router) => {
         })
     }
     /**
-     * 计算每张切图的宽高
+     * @description 计算每张切图的宽高
      *
      * @param {Object} obj 图片尺寸 - 宽度(obj.naturalWidth) & 高度(obj.naturalHeight) & 切图的基础高度值(obj.baseHight)
      * @return {Object} 含有heightArray的对象
@@ -109,7 +112,7 @@ module.exports = (router) => {
     }
 
     /**
-     * 计算切图坐标
+     * @description 计算切图坐标
      *
      * @param {Object} 每张切图的高度数组(obj.heightArr) & 切图宽度(obj.naturalWidth) 
      * @return {Array} 含有positionArray 切图坐标数组的对象
@@ -137,7 +140,7 @@ module.exports = (router) => {
         })
     }
     /**
-     * 切图api调用，累加实现计算坐标位置
+     * @description 切图api调用，累加实现计算坐标位置
      *
      * @param {Object} obj imgObject 切图主体 & positionArr 切图坐标数组
      * @return {String} promise 切图文件夹
@@ -168,14 +171,13 @@ module.exports = (router) => {
     }
 
     /**
-     * 递归遍历文件夹读取图片
+     * @description 递归遍历文件夹读取图片
      *
      * @param {String} dir 切图文件夹路径
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
     function m_readDir(obj) {
-
         let extname = path.extname(obj.img)
         if (obj.type === 'pc') {
             fs.createReadStream(obj.img).pipe(fs.createWriteStream(`${obj.cropDir}background${extname}`))
@@ -208,7 +210,30 @@ module.exports = (router) => {
     }
 
     /**
-     * 读取excel文件
+     * @description 压缩图片
+     *
+     * @param {String} dir 切图文件夹路径
+     * @return {Array} fileArr 压缩切图数组
+     */
+    async function compressImg(dir) {
+        console.log(dir)
+        const files = await imagemin([dir + '/*.{jpg,png}'], {
+            destination: dir,
+            plugins: [
+                imageminJpegtran({
+                    quality: [0.6, 0.8]
+                }),
+                imageminPngquant({
+                    quality: [0.6, 0.8]
+                })
+            ]
+        })
+        return await obj
+    }
+
+
+    /**
+     * @description 读取excel文件
      *
      * @param {String} xlsxFile xlsx文件夹路径
      * @return {Array} urlList url数组
@@ -223,7 +248,7 @@ module.exports = (router) => {
     }
 
     /**
-     * 递归遍历文件夹读取图片和html
+     * @description 递归遍历文件夹读取图片和html
      *
      * @param {String} dir 切图文件夹路径
      * @param {Array} fileArr 切图数组
@@ -244,7 +269,7 @@ module.exports = (router) => {
     }
 
     /**
-     * 循环上传阿里云
+     * @description 循环上传阿里云
      *
      * @param {Array} imgArray 切图文件夹路径
      * @return {String} 上传后的图片url
@@ -280,7 +305,10 @@ module.exports = (router) => {
         }).then(obj => {
             return m_readDir(obj[0])
         }).then(obj => {
+            return compressImg(obj.cropDir)
+        }).then(obj => {
             obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
+            console.log(obj)
             obj.fileArrayOnline = obj.fileArray.map(item => {
                 var arr = item.split('/')
                 return arr[arr.length - 1]
