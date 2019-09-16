@@ -89,7 +89,7 @@ module.exports = (router) => {
      * @param {Object} obj 图片尺寸 - 宽度(obj.naturalWidth) & 高度(obj.naturalHeight) & 切图的基础高度值(obj.baseHight)
      * @return {Object} 含有heightArray的对象
      */
-    async function m_storeSize(obj) {
+    async function storeSize(obj) {
         console.log('第 1 步：计算每块切图高度')
         let width = obj.naturalWidth
         let height = obj.naturalHeight
@@ -118,7 +118,7 @@ module.exports = (router) => {
      * @param {Object} 每张切图的高度数组(obj.heightArr) & 切图宽度(obj.naturalWidth) 
      * @return {Object} 含有positionArray 切图坐标数组的对象
      */
-    function m_cropPosition(obj) {
+    function cropPosition(obj) {
         let coordinate_x = obj.type === 'pc'? 360 : 0
         let imgWidth = obj.type === 'pc'? 1200 : obj.naturalWidth
         return new Promise((resolve, reject) => {
@@ -146,7 +146,7 @@ module.exports = (router) => {
      * @param {Object} obj imgObject 切图主体 & positionArr 切图坐标数组
      * @return {String} promise 切图文件夹
      */
-    function m_crop(obj) {
+    function crop(obj) {
         let imgObject = obj.img
         let positionArr = obj.positionArray
         let imgExt  = path.extname(obj.img)
@@ -178,7 +178,7 @@ module.exports = (router) => {
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
-    function m_readDir(obj) {
+    function readDir(obj) {
         let extname = path.extname(obj.img)
         if (obj.type === 'pc') {
             fs.createReadStream(obj.img).pipe(fs.createWriteStream(`${obj.cropDir}background${extname}`))
@@ -255,7 +255,7 @@ module.exports = (router) => {
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
-    function m_readDir2(obj) {
+    function readDir2(obj) {
         let dir = obj.cropDir
         if (!dir) return
         return new Promise((resolve, reject) => {
@@ -275,7 +275,7 @@ module.exports = (router) => {
      * @param {Array} imgArray 切图文件夹路径
      * @return {String} 上传后的图片url
      */
-    function m_uploadToOss(fileList) {
+    function uploadToOss(fileList) {
         let uuid = uuidv1()
         let promises = fileList.map((file, index) => {
             return new Promise((resolve, reject) => {
@@ -298,18 +298,17 @@ module.exports = (router) => {
     router.post('/generatorPage', async (ctx, next) => {
         await uploadImg(ctx).then(img => {
             mobile.reqInfo.img = img
-            return m_storeSize(mobile.reqInfo)
+            return storeSize(mobile.reqInfo)
         }).then(obj => {
-            return m_cropPosition(obj)
+            return cropPosition(obj)
         }).then(obj => {
-            return m_crop(obj)
+            return crop(obj)
         }).then(obj => {
-            return m_readDir(obj[0])
+            return readDir(obj[0])
         }).then(obj => {
             return compressImg(obj.cropDir)
         }).then(obj => {
             obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
-            console.log(obj)
             obj.fileArrayOnline = obj.fileArray.map(item => {
                 var arr = item.split('/')
                 return arr[arr.length - 1]
@@ -318,7 +317,6 @@ module.exports = (router) => {
                 console.log('删掉background')
                 obj.fileArrayOnline.shift()
             }
-            console.log(obj)
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
                 await ctx.render(`template-${obj.type}`, {
                     obj
@@ -336,9 +334,9 @@ module.exports = (router) => {
                 })
             })
         }).then(url => { // 读取文件夹下所有图片和html
-            return m_readDir2(mobile.reqInfo)
+            return readDir2(mobile.reqInfo)
         }).then(fileList => { //上传至阿里云
-            return m_uploadToOss(fileList)
+            return uploadToOss(fileList)
         }).then(list => { // 接口输出
             let host = 'https://fe-static.htd.cn/'
             ctx.body = {
