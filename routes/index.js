@@ -50,6 +50,7 @@ module.exports = (router) => {
                             naturalHeight: fields.naturalHeight[0]
                         }
                         console.log(mobile.reqInfo)
+                        console.log('mobile.reqInfo', mobile.reqInfo)
                         resolve(img)
                     }
                 }
@@ -115,7 +116,7 @@ module.exports = (router) => {
      * @description 计算切图坐标
      *
      * @param {Object} 每张切图的高度数组(obj.heightArr) & 切图宽度(obj.naturalWidth) 
-     * @return {Array} 含有positionArray 切图坐标数组的对象
+     * @return {Object} 含有positionArray 切图坐标数组的对象
      */
     function m_cropPosition(obj) {
         let coordinate_x = obj.type === 'pc'? 360 : 0
@@ -212,11 +213,11 @@ module.exports = (router) => {
     /**
      * @description 压缩图片
      *
-     * @param {String} dir 切图文件夹路径
+     * @param {String} obj 切图文件夹路径
      * @return {Array} fileArr 压缩切图数组
      */
-    async function compressImg(dir) {
-        console.log(dir)
+    async function compressImg(obj) {
+        let dir = obj.cropDir
         const files = await imagemin([dir + '/*.{jpg,png}'], {
             destination: dir,
             plugins: [
