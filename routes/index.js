@@ -1,3 +1,4 @@
+const controllers = require('../controllers/index')
 module.exports = (router) => {
     const fs = require('fs')
     const gm = require('gm')
@@ -9,17 +10,12 @@ module.exports = (router) => {
     const multiparty = require('multiparty')
     const currentDate = require("../utils/getCurrentDate")
     const uuidv1 = require('uuid/v1')
-    const xlsx = require('node-xlsx')
+    
     const makeDir = require('../utils/makeDir')
     const imagemin = require('imagemin')
     const imageminJpegtran = require('imagemin-jpegtran')
     const imageminPngquant = require('imagemin-pngquant')
-
-    router.get('/', async (ctx, next) => {
-        await ctx.render('index', {
-
-        })
-    })
+    router.get('/', controllers.generator.init) // 首页
 
     /**
      * @description 上传图片到服务器
@@ -57,32 +53,7 @@ module.exports = (router) => {
             })
         })
     }
-    /**
-     * @description 上传excel到服务器
-     *
-     * @param {Object} ctx koa上下文
-     * @return {String} 服务器上的图片路径
-     */
-    function uploadExcel(ctx) {
-        let uploadExcelDir = path.resolve(__dirname, '../public/uploads/docs')
-        console.log()
-        makeDir(uploadExcelDir)
-        return new Promise((resolve, reject) => {
-            let form = new multiparty.Form({ uploadDir: uploadExcelDir })
-            form.parse(ctx.req, function (err, fields, files) {
-                if (err) {
-                    reject()
-                } else {
-                    if(files && files.file && files.file.length) {
-                        let excel = files.file[0].path
-                        let excelExt = path.extname(excel) //获取excel后缀
-                        let fileName = path.basename(excel)//获取excel名
-                        resolve(excel)
-                    }
-                }
-            })
-        })
-    }
+
     /**
      * @description 计算每张切图的宽高
      *
@@ -232,22 +203,6 @@ module.exports = (router) => {
         return await obj
     }
 
-
-    /**
-     * @description 读取excel文件
-     *
-     * @param {String} xlsxFile xlsx文件夹路径
-     * @return {Array} urlList url数组
-     */
-    function readXlsx(xlsxFile) {
-        let obj = xlsx.parse(xlsxFile);
-        let urlList = []
-        for(let url of obj[0].data) {
-            urlList.push(url[0])
-        }
-        return urlList
-    }
-
     /**
      * @description 递归遍历文件夹读取图片和html
      *
@@ -355,33 +310,7 @@ module.exports = (router) => {
         }) 
     })
 
-    // 读取excel接口
-    router.get('/readXlsx', async (ctx, next) => {
-        let urlList = readXlsx(ctx.querystring)
-        ctx.body = {
-            code: 1,
-            message: 'success',
-            data: urlList
-        }
-    })
-
-    // 上传excel接口
-    router.post('/uploadLocal', async (ctx, next) => {
-        await uploadExcel(ctx).then(excelPath => {
-            ctx.body = {
-                code: 1,
-                message: 'success',
-                data: {
-                    url: excelPath
-                }
-            }
-        }).catch(e => {
-            ctx.body = {
-                code: 0,
-                message: 'fail',
-                data: e
-            }
-        })
-
-    })
+    
+    router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
+    router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
 }
