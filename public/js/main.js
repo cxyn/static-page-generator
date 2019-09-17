@@ -229,15 +229,17 @@ $(function () {
             return;
         }
         var layerIndex = layer.load();
-        page.linkInfor = page.calSize(page.model, page.ratio, page.vw_ratio);
-        $('.link').each(function(linkIndex) {
-            var value = $.trim($(this).val());
-            page.linkInfor.forEach(function(linkPosition, positionIndex) {
-                if(linkIndex === positionIndex) {
-                    linkPosition.link = value;
-                }
-            })
-        });
+        if(page.model) {
+            page.linkInfor = page.calSize(page.model, page.ratio, page.vw_ratio);
+            $('.link').each(function(linkIndex) {
+                var value = $.trim($(this).val());
+                page.linkInfor.forEach(function(linkPosition, positionIndex) {
+                    if(linkIndex === positionIndex) {
+                        linkPosition.link = value;
+                    }
+                })
+            });
+        }
         data.append("file", document.querySelector('.imgFile').files[0]);
         data.append("baseHeight", pageInfo.baseHeight);
         data.append("title", pageInfo.title);

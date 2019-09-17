@@ -1,3 +1,4 @@
+const controllers = require('../controllers/index')
 module.exports = (router) => {
     const fs = require('fs')
     const gm = require('gm')
@@ -9,17 +10,15 @@ module.exports = (router) => {
     const multiparty = require('multiparty')
     const currentDate = require("../utils/getCurrentDate")
     const uuidv1 = require('uuid/v1')
-    const xlsx = require('node-xlsx')
+    
     const makeDir = require('../utils/makeDir')
-
-    router.get('/', async (ctx, next) => {
-        await ctx.render('index', {
-
-        })
-    })
+    const imagemin = require('imagemin')
+    const imageminJpegtran = require('imagemin-jpegtran')
+    const imageminPngquant = require('imagemin-pngquant')
+    router.get('/', controllers.generator.init) // 首页
 
     /**
-     * 上传图片到服务器
+     * @description 上传图片到服务器
      *
      * @param {Object} ctx koa上下文
      * @return {String} 服务器上的图片路径
@@ -46,45 +45,22 @@ module.exports = (router) => {
                             naturalWidth: fields.naturalWidth[0],
                             naturalHeight: fields.naturalHeight[0]
                         }
+                        console.log(mobile.reqInfo)
+                        console.log('mobile.reqInfo', mobile.reqInfo)
                         resolve(img)
                     }
                 }
             })
         })
     }
+
     /**
-     * 上传excel到服务器
-     *
-     * @param {Object} ctx koa上下文
-     * @return {String} 服务器上的图片路径
-     */
-    function uploadExcel(ctx) {
-        let uploadExcelDir = path.resolve(__dirname, '../public/uploads/docs')
-        console.log()
-        makeDir(uploadExcelDir)
-        return new Promise((resolve, reject) => {
-            let form = new multiparty.Form({ uploadDir: uploadExcelDir })
-            form.parse(ctx.req, function (err, fields, files) {
-                if (err) {
-                    reject()
-                } else {
-                    if(files && files.file && files.file.length) {
-                        let excel = files.file[0].path
-                        let excelExt = path.extname(excel) //获取excel后缀
-                        let fileName = path.basename(excel)//获取excel名
-                        resolve(excel)
-                    }
-                }
-            })
-        })
-    }
-    /**
-     * 计算每张切图的宽高
+     * @description 计算每张切图的宽高
      *
      * @param {Object} obj 图片尺寸 - 宽度(obj.naturalWidth) & 高度(obj.naturalHeight) & 切图的基础高度值(obj.baseHight)
      * @return {Object} 含有heightArray的对象
      */
-    async function m_storeSize(obj) {
+    async function storeSize(obj) {
         console.log('第 1 步：计算每块切图高度')
         let width = obj.naturalWidth
         let height = obj.naturalHeight
@@ -108,12 +84,12 @@ module.exports = (router) => {
     }
 
     /**
-     * 计算切图坐标
+     * @description 计算切图坐标
      *
      * @param {Object} 每张切图的高度数组(obj.heightArr) & 切图宽度(obj.naturalWidth) 
-     * @return {Array} 含有positionArray 切图坐标数组的对象
+     * @return {Object} 含有positionArray 切图坐标数组的对象
      */
-    function m_cropPosition(obj) {
+    function cropPosition(obj) {
         let coordinate_x = obj.type === 'pc'? 360 : 0
         let imgWidth = obj.type === 'pc'? 1200 : obj.naturalWidth
         return new Promise((resolve, reject) => {
@@ -136,12 +112,12 @@ module.exports = (router) => {
         })
     }
     /**
-     * 切图api调用，累加实现计算坐标位置
+     * @description 切图api调用，累加实现计算坐标位置
      *
      * @param {Object} obj imgObject 切图主体 & positionArr 切图坐标数组
      * @return {String} promise 切图文件夹
      */
-    function m_crop(obj) {
+    function crop(obj) {
         let imgObject = obj.img
         let positionArr = obj.positionArray
         let imgExt  = path.extname(obj.img)
@@ -167,14 +143,13 @@ module.exports = (router) => {
     }
 
     /**
-     * 递归遍历文件夹读取图片
+     * @description 递归遍历文件夹读取图片
      *
      * @param {String} dir 切图文件夹路径
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
-    function m_readDir(obj) {
-
+    function readDir(obj) {
         let extname = path.extname(obj.img)
         if (obj.type === 'pc') {
             fs.createReadStream(obj.img).pipe(fs.createWriteStream(`${obj.cropDir}background${extname}`))
@@ -207,28 +182,35 @@ module.exports = (router) => {
     }
 
     /**
-     * 读取excel文件
+     * @description 压缩图片
      *
-     * @param {String} xlsxFile xlsx文件夹路径
-     * @return {Array} urlList url数组
+     * @param {String} obj 切图文件夹路径
+     * @return {Array} fileArr 压缩切图数组
      */
-    function readXlsx(xlsxFile) {
-        let obj = xlsx.parse(xlsxFile);
-        let urlList = []
-        for(let url of obj[0].data) {
-            urlList.push(url[0])
-        }
-        return urlList
+    async function compressImg(obj) {
+        let dir = obj.cropDir
+        const files = await imagemin([dir + '/*.{jpg,png}'], {
+            destination: dir,
+            plugins: [
+                imageminJpegtran({
+                    quality: [0.6, 0.8]
+                }),
+                imageminPngquant({
+                    quality: [0.6, 0.8]
+                })
+            ]
+        })
+        return await obj
     }
 
     /**
-     * 递归遍历文件夹读取图片和html
+     * @description 递归遍历文件夹读取图片和html
      *
      * @param {String} dir 切图文件夹路径
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
-    function m_readDir2(obj) {
+    function readDir2(obj) {
         let dir = obj.cropDir
         if (!dir) return
         return new Promise((resolve, reject) => {
@@ -243,12 +225,12 @@ module.exports = (router) => {
     }
 
     /**
-     * 循环上传阿里云
+     * @description 循环上传阿里云
      *
      * @param {Array} imgArray 切图文件夹路径
      * @return {String} 上传后的图片url
      */
-    function m_uploadToOss(fileList) {
+    function uploadToOss(fileList) {
         let uuid = uuidv1()
         let promises = fileList.map((file, index) => {
             return new Promise((resolve, reject) => {
@@ -271,13 +253,15 @@ module.exports = (router) => {
     router.post('/generatorPage', async (ctx, next) => {
         await uploadImg(ctx).then(img => {
             mobile.reqInfo.img = img
-            return m_storeSize(mobile.reqInfo)
+            return storeSize(mobile.reqInfo)
         }).then(obj => {
-            return m_cropPosition(obj)
+            return cropPosition(obj)
         }).then(obj => {
-            return m_crop(obj)
+            return crop(obj)
         }).then(obj => {
-            return m_readDir(obj[0])
+            return readDir(obj[0])
+        }).then(obj => {
+            return compressImg(obj.cropDir)
         }).then(obj => {
             obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
             obj.fileArrayOnline = obj.fileArray.map(item => {
@@ -288,14 +272,12 @@ module.exports = (router) => {
                 console.log('删掉background')
                 obj.fileArrayOnline.shift()
             }
-            console.log(obj)
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
                 await ctx.render(`template-${obj.type}`, {
                     obj
                 })
             })
         }).then(() => { // 生成静态html
-            console.log('生成静态html')
             return new Promise((resolve, reject) => {
                 let pageName = Date.now() + '.html'
                 let currentDir = mobile.reqInfo.fileArray[1].match(/^(.+)img-.+$/)[1]
@@ -307,9 +289,9 @@ module.exports = (router) => {
                 })
             })
         }).then(url => { // 读取文件夹下所有图片和html
-            return m_readDir2(mobile.reqInfo)
+            return readDir2(mobile.reqInfo)
         }).then(fileList => { //上传至阿里云
-            return m_uploadToOss(fileList)
+            return uploadToOss(fileList)
         }).then(list => { // 接口输出
             let host = 'https://fe-static.htd.cn/'
             ctx.body = {
@@ -328,33 +310,7 @@ module.exports = (router) => {
         }) 
     })
 
-    // 读取excel接口
-    router.get('/readXlsx', async (ctx, next) => {
-        let urlList = readXlsx(ctx.querystring)
-        ctx.body = {
-            code: 1,
-            message: 'success',
-            data: urlList
-        }
-    })
-
-    // 上传excel接口
-    router.post('/uploadLocal', async (ctx, next) => {
-        await uploadExcel(ctx).then(excelPath => {
-            ctx.body = {
-                code: 1,
-                message: 'success',
-                data: {
-                    url: excelPath
-                }
-            }
-        }).catch(e => {
-            ctx.body = {
-                code: 0,
-                message: 'fail',
-                data: e
-            }
-        })
-
-    })
+    
+    router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
+    router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
 }
