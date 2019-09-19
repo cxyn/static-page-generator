@@ -42,6 +42,13 @@ $(function () {
             })
             return;
         }
+        if(type.indexOf("png") == -1 || type.indexOf("jpg") == -1) {
+            layer.open({
+                title: '提示',
+                content: '仅支持jpg和png格式的图片'
+            })
+            return;
+        }
         if(img.size > 1024 * 1024 * 10) {
             layer.open({
                 title: '提示'
