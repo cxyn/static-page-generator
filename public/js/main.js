@@ -1,4 +1,5 @@
 $(function () {
+    localStorage.removeItem('area')
     var page = page || {};
     page.model = null;
     page.ratio = 0;
@@ -63,6 +64,7 @@ $(function () {
         $('.preview img').selectAreas({
             minSize: [50, 50],
             onChanged: function(event, id, areas) {
+                localStorage.setItem('area', JSON.stringify(areas[id]))
                 page.model = $(this).selectAreas('relativeAreas');
                 page.ratio = document.querySelector('#previewImg').naturalWidth / 500;
                 page.vw_ratio = document.querySelector('#previewImg').naturalWidth / 100
@@ -279,4 +281,28 @@ $(function () {
             }
         })
     });
+
+
+    // 拷贝粘贴选框
+    $(document).on('copy', '.link', function(e) {
+        copyArea('.preview img');
+    });
+    function copyArea(selector) {
+        let areaOptions = JSON.parse(localStorage.getItem('area'));
+        if (areaOptions.width < $('.preview').width() / 2) {
+            areaOptions.x += 40;
+        } else {
+            areaOptions.y += 40;
+        }
+        
+        $(selector).selectAreas('add', areaOptions);
+        /* $('<div>').appendTo('.preview').css({
+            width: '100%',
+            height: '1px',
+            backgroundColor: '#f70',
+            position: 'absolute',
+            left: 0,
+            top: '555px'
+        }) */
+    }
 })
