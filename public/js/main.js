@@ -42,7 +42,7 @@ $(function () {
             })
             return;
         }
-        if(type.indexOf("png") == -1 || type.indexOf("jpg") == -1) {
+        if(type.indexOf("png") == -1 && type.indexOf("jpg") == -1 && type.indexOf("jpeg") == -1) {
             layer.open({
                 title: '提示',
                 content: '仅支持jpg和png格式的图片'

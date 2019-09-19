@@ -190,7 +190,7 @@ module.exports = (router) => {
             for (let i of files) {
                 let fileName = dir + i
                 ext = path.extname(fileName).toLowerCase()
-                if (ext.match('jpg') || ext.match('png') || ext.match('html')) {
+                if (ext.match('jpg') || ext.match('jpeg') || ext.match('png') || ext.match('html')) {
                     fileArr.push(fileName)
                 }
             }
@@ -225,7 +225,7 @@ module.exports = (router) => {
      */
     async function compressImg(obj) {
         let dir = obj.cropDir
-        const files = await imagemin([dir + '/*.{jpg,JPG,png,PNG}'], {
+        const files = await imagemin([dir + '/*.{jpg,JPG,jpeg,JPEG,png,PNG}'], {
             destination: dir,
             plugins: [
                 imageminJpegtran({
