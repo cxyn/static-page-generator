@@ -361,6 +361,130 @@
                 fireEvent("changing");
                 refresh("resizeSelection");
             },
+            keyboardResizeHandler = function (direction) {
+                cancelEvent(event);
+                focus();
+                var size = {
+                    width:  getData().width,
+                    height: getData().height
+                }
+                if (direction === 'r' || direction === 'l' ) {
+                    size.width += 1;
+                }
+                if (direction === 'd' || direction === 'u' ) {
+                    size.height += 1;
+                }
+                // if (card[card.length - 1] === "w") {
+                //     selectionOrigin[0] += area.width;
+                //     area.x = selectionOrigin[0] - area.width;
+                // }
+                // if (card[0] === "n") {
+                //     selectionOrigin[1] += area.height;
+                //     area.y = selectionOrigin[1] - area.height;
+                // }
+                // if (card === "n" || card === "s") {
+                //     resizeHorizontally = false;
+                // } else if (card === "e" || card === "w") {
+                //     resizeVertically = false;
+                // }
+                resizeSelectionByKeyboard(size);
+                // on("move", resizeSelection);
+                // on("stop", releaseSelection);
+
+                refresh("keyboardResizeHandler");
+            },
+            resizeSelectionByKeyboard = function (size) {
+                focus();
+
+                // Get the selection size
+                var height = size.height,
+                    width = size.width;
+
+                // If the selection size is smaller than the minimum size set it to minimum size
+                if (Math.abs(width) < options.minSize[0]) {
+                    width = (width >= 0) ? options.minSize[0] : - options.minSize[0];
+                }
+                if (Math.abs(height) < options.minSize[1]) {
+                    height = (height >= 0) ? options.minSize[1] : - options.minSize[1];
+                }
+                // Test if the selection size exceeds the image bounds
+                if (selectionOrigin[0] + width < 0 || selectionOrigin[0] + width > $image.width()) {
+                    width = - width;
+                }
+                if (selectionOrigin[1] + height < 0 || selectionOrigin[1] + height > $image.height()) {
+                    height = - height;
+                }
+                // Test if the selection size is bigger than the maximum size (ignored if minSize > maxSize)
+                if (options.maxSize[0] > options.minSize[0] && options.maxSize[1] > options.minSize[1]) {
+                    if (Math.abs(width) > options.maxSize[0]) {
+                        width = (width >= 0) ? options.maxSize[0] : - options.maxSize[0];
+                    }
+
+                    if (Math.abs(height) > options.maxSize[1]) {
+                        height = (height >= 0) ? options.maxSize[1] : - options.maxSize[1];
+                    }
+                }
+
+                // Set the selection size
+                if (resizeHorizontally) {
+                    area.width = width;
+                }
+                if (resizeVertically) {
+                    area.height = height;
+                }
+                // If any aspect ratio is specified
+                if (options.aspectRatio) {
+                    // Calculate the new width and height
+                    if ((width > 0 && height > 0) || (width < 0 && height < 0)) {
+                        if (resizeHorizontally) {
+                            height = Math.round(width / options.aspectRatio);
+                        } else {
+                            width = Math.round(height * options.aspectRatio);
+                        }
+                    } else {
+                        if (resizeHorizontally) {
+                            height = - Math.round(width / options.aspectRatio);
+                        } else {
+                            width = - Math.round(height * options.aspectRatio);
+                        }
+                    }
+                    // Test if the new size exceeds the image bounds
+                    if (selectionOrigin[0] + width > $image.width()) {
+                        width = $image.width() - selectionOrigin[0];
+                        height = (height > 0) ? Math.round(width / options.aspectRatio) : - Math.round(width / options.aspectRatio);
+                    }
+
+                    if (selectionOrigin[1] + height < 0) {
+                        height = - selectionOrigin[1];
+                        width = (width > 0) ? - Math.round(height * options.aspectRatio) : Math.round(height * options.aspectRatio);
+                    }
+
+                    if (selectionOrigin[1] + height > $image.height()) {
+                        height = $image.height() - selectionOrigin[1];
+                        width = (width > 0) ? Math.round(height * options.aspectRatio) : - Math.round(height * options.aspectRatio);
+                    }
+
+                    // Set the selection size
+                    area.width = width;
+                    area.height = height;
+                }
+
+                if (area.width < 0) {
+                    area.width = Math.abs(area.width);
+                    area.x = selectionOrigin[0] - area.width;
+                } else {
+                    area.x = selectionOrigin[0];
+                }
+                if (area.height < 0) {
+                    area.height = Math.abs(area.height);
+                    area.y = selectionOrigin[1] - area.height;
+                } else {
+                    area.y = selectionOrigin[1];
+                }
+
+                fireEvent("changing");
+                refresh("resizeSelectionByKeyboard");
+            },
             moveSelection = function (event) {
                 cancelEvent(event);
                 if (! options.allowMove) {
@@ -492,6 +616,7 @@
                     .bind("touchstart", pickResizeHandler);
             });
         }
+
         // initialize delete button
         if (options.allowDelete) {
             var bindToDelete = function ($obj) {
@@ -536,6 +661,31 @@
                 moveTo(point);
                 fireEvent("changed");
             },
+            nudgeForResize: function (point) {
+                point.x = area.x;
+                point.y = area.y;
+                if (point.u) {
+                    point.y = area.y - 1;
+                }
+                if (point.l) {
+                    point.x = area.x - 1;
+                }
+                moveTo(point);
+                fireEvent("changed");
+            },
+            resizeBykeyboard: function (move, direction) {
+                // point.x = area.x;
+                // point.y = area.y;
+                // if (point.u) {
+                //     point.y = area.y - point.u;
+                // }
+                // if (point.l) {
+                //     point.x = area.x - point.l;
+                // }
+                // moveTo(point);
+                // fireEvent("changed");
+                keyboardResizeHandler(move, direction);
+            },
             set: function (dimensions, silent) {
                 area = $.extend(area, dimensions);
                 selectionOrigin[0] = area.x;
@@ -550,7 +700,6 @@
             }
         };
     };
-
 
     $.imageSelectAreas = function() { };
 
@@ -656,6 +805,36 @@
         }
         if (this.options.allowNudge) {
             $('html').keydown(function (e) { // move selection with arrow keys
+                if (!e.metaKey) {
+                    var codes = {
+                            37: "l",
+                            38: "u",
+                            39: "r",
+                            40: "d"
+                        },
+                        direction = codes[e.which],
+                        selectedArea;
+    
+                    if (direction) {
+                        that._eachArea(function (area) {
+                            if (area.getData().z === 100) {
+                                selectedArea = area;
+                                return false;
+                            }
+                        });
+                        if (selectedArea) {
+                            var move = {};
+                            move[direction] = 1;
+                            selectedArea.nudge(move);
+                        }
+                    }
+                }
+            });
+        }
+        
+        if (this.options.allowResizeWithKeybord) {
+            var _this = this;
+            $('html').keydown(function (e) { // 通过组合键来改变上下左右尺寸
                 var codes = {
                         37: "l",
                         38: "u",
@@ -665,51 +844,22 @@
                     direction = codes[e.which],
                     selectedArea;
 
-                if (direction) {
-                    that._eachArea(function (area) {
-                        if (area.getData().z === 100) {
-                            selectedArea = area;
-                            return false;
+                    if (e.metaKey) {
+                        if (direction) {
+                            that._eachArea(function (area) {
+                                if (area.getData().z === 100) {
+                                    selectedArea = area;
+                                    return false;
+                                }
+                            });
+                            if (selectedArea) {
+                                var move = {};
+                                move[direction] = 1;
+                                selectedArea.nudgeForResize(move);
+                                selectedArea.resizeBykeyboard(direction);
+                            }
                         }
-                    });
-                    if (selectedArea) {
-                        var move = {};
-                        move[direction] = 1;
-                        selectedArea.nudge(move);
                     }
-                }
-            });
-        }
-
-        if (this.options.allowResizeWithKeybord) {
-            $('html').keydown(function (e) { // 通过组合键来改变上下左右尺寸
-                if (e.altKey && e.which == 37) {
-                    console.log('组合键')
-                }
-                // var codes = {
-                //         37: "l",
-                //         38: "u",
-                //         39: "r",
-                //         40: "d"
-                //     },
-                //     direction = codes[e.which],
-                //     selectedArea;
-
-                // if (direction) {
-                //     that._eachArea(function (area) {
-                        
-                //             console.log(area.getData())
-                //         if (area.getData().z === 100) {
-                //             selectedArea = area;
-                //             return false;
-                //         }
-                //     });
-                //     if (selectedArea) {
-                //         var move = {};
-                //         move[direction] = 1;
-                //         selectedArea.nudge(move);
-                //     }
-                // }
             });
         }
     };
@@ -865,7 +1015,6 @@
         }
         return $object.data("mainImageSelectAreas");
     };
-
 
     $.fn.selectAreas = function(customOptions) {
         if ( $.imageSelectAreas.prototype[customOptions] ) { // Method call
