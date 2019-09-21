@@ -309,9 +309,10 @@ module.exports = (router) => {
             if (obj.type === 'pc') {
                 obj.fileArrayOnline.splice(0,2)
             }
+            mobile.newObj = obj
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
                 await ctx.render(`template-${obj.type}`, {
-                    obj
+                    obj: mobile.newObj
                 })
             })
         }).then(() => { // 生成静态html
