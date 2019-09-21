@@ -124,8 +124,37 @@ body {
                         color: #999;
                     }
                 }
-            }
-            
+            } 
+        }
+        @at-root .statistic {
+            margin: 20px 0;
+            padding-left: 1px;
+            @at-root .checkBox {
+                position: relative;
+                padding-left: 15px;
+                input {
+                    display: none;
+                    &:checked + label::before {
+                        font-size: 16px;
+                        content: "\e655";
+                        color: #f70;
+                    }
+                }
+                
+                label {
+                    margin: 0 20px 0 5px;
+                    font-size: 14px;
+                    &::before{
+                        font-size: 16px;
+                        font-family: "iconfont" !important;
+                        content: "\e6ac";
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        color: #999;
+                    }
+                }
+            } 
         }
         @at-root .actionBox {
             display: flex;

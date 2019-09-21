@@ -2,7 +2,6 @@ const controllers = require('../controllers/index')
 const fs = require('fs')
 const gm = require('gm')
 const path = require('path')
-// const upload = require("../utils/upload")
 const removeAll = require("../utils/removeAll")
 const oss = require("../utils/oss")
 const request = require('request')
@@ -17,6 +16,8 @@ module.exports = (router) => {
     router.get('/', controllers.generator.init) // 首页
     router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
     router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
+    var mobile = mobile || {}
+    mobile.uuid = uuidv1()
     /**
      * @description 上传图片到服务器
      *
@@ -43,7 +44,8 @@ module.exports = (router) => {
                             keywords: fields.keywords[0],
                             description: fields.description[0],
                             naturalWidth: fields.naturalWidth[0],
-                            naturalHeight: fields.naturalHeight[0]
+                            naturalHeight: fields.naturalHeight[0],
+                            statistic: fields.statistic[0]
                         }
                         resolve(img)
                     }
@@ -225,7 +227,7 @@ module.exports = (router) => {
      */
     async function compressImg(obj) {
         let dir = obj.cropDir
-        const files = await imagemin([dir + '/*.{jpg,JPG,jpeg,JPEG,png,PNG}'], {
+        await imagemin([dir + '/*.{jpg,JPG,jpeg,JPEG,png,PNG}'], {
             destination: dir,
             plugins: [
                 imageminJpegtran({
@@ -273,7 +275,7 @@ module.exports = (router) => {
         let promises = fileList.map((file, index) => {
             return new Promise((resolve, reject) => {
                 try {
-                    var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
+                    var result = oss.put('static/pages/test/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
                     resolve(result)
                 } catch (err) {
                     console.log(err)
@@ -284,8 +286,6 @@ module.exports = (router) => {
         })
         return Promise.all(promises)
     }
-    var mobile = mobile || {}
-    mobile.uuid = uuidv1()
 
     // 生成页面接口
     router.post('/generatorPage', async (ctx, next) => {
@@ -309,7 +309,6 @@ module.exports = (router) => {
             if (obj.type === 'pc') {
                 obj.fileArrayOnline.splice(0,2)
             }
-            console.log(obj.fileArrayOnline)
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
                 await ctx.render(`template-${obj.type}`, {
                     obj

@@ -34,20 +34,21 @@
 </style>
 </head>
 <body>
-    <% if(obj.linkInfor.length) { %>
+    {% if(obj.linkInfor.length)  %}
     <div class="container">
-        <% obj.fileArrayOnline.forEach(function(url){ %>
-            <img src="<%=url %>">
-        <% }); %>
-        <% obj.linkInfor.forEach(function(link){ %>
-            <a href="<%=link.link %>" style="width:<%=link.width %>;height:<%=link.height %>;top:<%=link.y %>;left:<%=link.x %>"></a>
-        <% }); %>
+        {% for url in obj.fileArrayOnline %}
+            <img src="{{url}}">
+        {% endfor %}
+        {% for link in obj.linkInfor %}
+            <a href="{{link.link}}" style="width:{{link.width}};height:{{link.height}};top:{{link.y}};left:{{link.x}}"></a>
+        {% endfor %}
     </div>
-    <% } else { %>
-        <% obj.fileArrayOnline.forEach(function(url){ %>
-            <img src="<%=url %>">
-        <% }); %>
-    <% } %>    
+    {% else %}
+        {% for url in obj.fileArrayOnline %}
+            <img src="{{url}}">
+        {% endfor %}
+   {% endif %}
+   {% if obj.obj.statistic == 1 %}
     <!-- GrowingIO Analytics code version 2.1 -->
     <!-- Copyright 2015-2018 GrowingIO, Inc. More info available at http://www.growingio.com -->
     <script type='text/javascript'>
@@ -58,5 +59,6 @@
         gio('send');
     </script>
     <!-- End GrowingIO Analytics code version: 2.1 -->
+    {% endif %}
 </body>
 </html>

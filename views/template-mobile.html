@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title><%=obj.title %></title>
+<title>{{obj.title}}</title>
 <link rel="shortcut icon" href="//mall.htd.cn/static/icon/htd_logo.ico" type="image/x-icon">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,8 +10,8 @@
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="Content-Type" content="multipart/form-data;">
 <meta http-equiv="Cache-Control" content="no-cache">
-<meta name="description" content="<%=obj.description %>">
-<meta name="keywords" content="<%=obj.keywords %>">
+<meta name="description" content="{{obj.description}}">
+<meta name="keywords" content="{{obj.keywords}}">
 <style>        
     * {            
         margin: 0;            
@@ -31,13 +31,14 @@
 </style>
 </head>
 <body>
-        <% obj.fileArrayOnline.forEach(function(url, index){ %>
-            <img src="<%=url %>">
-        <% }); %>
+        {% for url in obj.fileArrayOnline %}
+            <img src="{{url}}">
+        {% endfor %}
 
-        <% obj.linkInfor.forEach(function(link){ %>
-            <a href="<%=link.link %>" style="width:<%=link.width %>;height:<%=link.height %>;top:<%=link.y %>;left:<%=link.x %>"></a>
-        <% }); %>
+        {% for link in obj.linkInfor %}
+            <a href="{{link.link}}" style="width:{{link.width}};height:{{link.height}};top:{{link.y}};left:{{link.x}}"></a>
+        {% endfor %}
+        {% if obj.statistic == 1 %}
         <!-- GrowingIO Analytics code version 2.1 -->
         <!-- Copyright 2015-2018 GrowingIO, Inc. More info available at http://www.growingio.com -->
         <script type='text/javascript'>
@@ -48,5 +49,6 @@
             gio('send');
         </script>
         <!-- End GrowingIO Analytics code version: 2.1 -->
+        {% endif %}
 </body>
 </html>

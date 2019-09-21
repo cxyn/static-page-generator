@@ -136,7 +136,6 @@ $(function () {
     // 上传excel
     $('.excel').on('change', function(e) {
         let type = this.files[0].type;
-        console.log(type.includes('sheet'));
         if (!type.includes('excel') && !type.includes('sheet')) {
             layer.alert('请上传 .xls 或者 .xlsx 文件', {
                 icon: 0
@@ -216,24 +215,25 @@ $(function () {
             title: $.trim($('.pageTitle').val()),
             keywords: $.trim($('.pageKeywords').val()),
             type: $('.pageType :radio:checked').val(),
-            description: $.trim($('.pageDesc').val())
+            description: $.trim($('.pageDesc').val()),
+            statistic: $('#statistic').is(':checked')? 1 : 0
         }
         if(!pageInfo.baseHeight) {
             layer.open({
-                title: '提示'
-                ,content: '请输入切块基准高度'
+                title: '提示',
+                content: '请输入切块基准高度'
             })
         }else if(!/^\d+$/.test(pageInfo.baseHeight)) {
             layer.open({
-                title: '提示'
-                ,content: '请输入纯数字'
+                title: '提示',
+                content: '请输入纯数字'
             })
             return;
         }
         if(!pageInfo.title) {
             layer.open({
-                title: '提示'
-                ,content: '请输入页面title'
+                title: '提示',
+                content: '请输入页面title'
             })
             return;
         }
@@ -255,6 +255,7 @@ $(function () {
         data.append("keywords", pageInfo.keywords);
         data.append("description", pageInfo.description);
         data.append("type", pageInfo.type);
+        data.append("statistic", pageInfo.statistic);
         data.append("linkInfor", JSON.stringify(page.linkInfor));
         data.append("naturalWidth", document.querySelector('#previewImg').naturalWidth);
         data.append("naturalHeight", document.querySelector('#previewImg').naturalHeight);
