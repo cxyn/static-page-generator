@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>{{obj.title}}</title>
+<link rel="shortcut icon" href="//mall.htd.cn/static/icon/htd_logo.ico" type="image/x-icon">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Content-Type" content="multipart/form-data;">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="description" content="{{obj.description}}">
+<meta name="keywords" content="{{obj.keywords}}">
+<style>        
+    * {            
+        margin: 0;            
+        padding: 0;        
+    }        
+    img {            
+        display: block;            
+        width: 100%;            
+        height: auto;        
+    }    
+    body {
+        position: relative;
+    }
+    a {
+        position: absolute;
+    }
+</style>
+</head>
+<body>
+        {% for url in obj.fileArrayOnline %}
+            <img src="{{url}}">
+        {% endfor %}
+
+        {% for link in obj.linkInfor %}
+            <a href="{{link.link}}" style="width:{{link.width}};height:{{link.height}};top:{{link.y}};left:{{link.x}}"></a>
+        {% endfor %}
+        {% if obj.statistic == 1 %}
+        <!-- GrowingIO Analytics code version 2.1 -->
+        <!-- Copyright 2015-2018 GrowingIO, Inc. More info available at http://www.growingio.com -->
+        <script type='text/javascript'>
+            !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.giocdn.com/2.1/gio.js","gio");
+            gio('init','a505ac9fbfc19720', {});
+            //custom page code begin here
+            //custom page code end here
+            gio('send');
+        </script>
+        <!-- End GrowingIO Analytics code version: 2.1 -->
+        {% endif %}
+</body>
+</html>

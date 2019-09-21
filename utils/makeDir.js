@@ -1,18 +1,9 @@
-// const fs = require('fs')
-// module.exports = function(dir) {
-//     try {
-//         fs.statSync(dir)
-//         console.log('目录已存在')
-//     } catch (e) {
-//         fs.mkdir(dir, (err) => {
-//             if (err) {
-//                 console.log(err)
-//                 return
-//             }
-//             console.log('创建目录成功')
-//         })
-//     }
-// }
+/**
+ * @description 递归创建文件夹
+ *
+ * @param {String} dir 文件夹路径
+ * @return {bolleen} 含有heightArray的对象
+ */
 const fs = require('fs')
 const path = require('path')
 function mkdirsSync(dir) {

@@ -1,22 +1,23 @@
 const controllers = require('../controllers/index')
+const fs = require('fs')
+const gm = require('gm')
+const path = require('path')
+const removeAll = require("../utils/removeAll")
+const oss = require("../utils/oss")
+const request = require('request')
+const multiparty = require('multiparty')
+const currentDate = require("../utils/getCurrentDate")
+const uuidv1 = require('uuid/v1')
+const makeDir = require('../utils/makeDir')
+const imagemin = require('imagemin')
+const imageminJpegtran = require('imagemin-jpegtran')
+const imageminPngquant = require('imagemin-pngquant')
 module.exports = (router) => {
-    const fs = require('fs')
-    const gm = require('gm')
-    const path = require('path')
-    // const upload = require("../utils/upload")
-    const removeAll = require("../utils/removeAll")
-    const oss = require("../utils/oss")
-    const request = require('request')
-    const multiparty = require('multiparty')
-    const currentDate = require("../utils/getCurrentDate")
-    const uuidv1 = require('uuid/v1')
-    
-    const makeDir = require('../utils/makeDir')
-    const imagemin = require('imagemin')
-    const imageminJpegtran = require('imagemin-jpegtran')
-    const imageminPngquant = require('imagemin-pngquant')
     router.get('/', controllers.generator.init) // 首页
-
+    router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
+    router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
+    var mobile = mobile || {}
+    mobile.uuid = uuidv1()
     /**
      * @description 上传图片到服务器
      *
@@ -43,10 +44,9 @@ module.exports = (router) => {
                             keywords: fields.keywords[0],
                             description: fields.description[0],
                             naturalWidth: fields.naturalWidth[0],
-                            naturalHeight: fields.naturalHeight[0]
+                            naturalHeight: fields.naturalHeight[0],
+                            statistic: fields.statistic[0]
                         }
-                        console.log(mobile.reqInfo)
-                        console.log('mobile.reqInfo', mobile.reqInfo)
                         resolve(img)
                     }
                 }
@@ -107,6 +107,30 @@ module.exports = (router) => {
                 })
                 return parseInt(curr) + parseInt(prev)
             }, 0)
+            if (obj.type === 'pc') {
+                obj.positionArray.push(
+                    {
+                        size: {
+                            width: 370,
+                            height: obj.naturalHeight
+                        },
+                        coordinate: {
+                            x: 0,
+                            y: 0
+                        }
+                    },
+                    {
+                        size: {
+                            width: 370,
+                            height: obj.naturalHeight
+                        },
+                        coordinate: {
+                            x: 1550,
+                            y: 0
+                        }
+                    }
+                )
+            }
             console.log('第 2 步：计算切图坐标')
             resolve(obj)
         })
@@ -125,11 +149,17 @@ module.exports = (router) => {
         let cropDir = path.join(__dirname, '../public/uploads/') + 'page-' + now + path.sep
         makeDir(cropDir)
         obj.cropDir = cropDir
+        let cropName = ''
         let promises = positionArr.map((postion, idx) => {
+            if(postion.size.width == '370') {
+                cropName = cropDir + '/aside-' + (idx + 1).toString() + imgExt
+            } else {
+                cropName = cropDir + '/img-' + (idx + 1).toString().padStart(2, '0') + imgExt
+            }
             return new Promise((resolve, reject) => {
                 gm(imgObject)
                     .crop(postion.size.width, postion.size.height, postion.coordinate.x, postion.coordinate.y)
-                    .write(cropDir + '/img-' + (idx + 1).toString().padStart(2, '0') + imgExt, (err, out) => {
+                    .write(cropName, (err, out) => {
                         if (err) {
                             console.log(err)
                             reject(err)
@@ -151,10 +181,6 @@ module.exports = (router) => {
      */
     function readDir(obj) {
         let extname = path.extname(obj.img)
-        if (obj.type === 'pc') {
-            fs.createReadStream(obj.img).pipe(fs.createWriteStream(`${obj.cropDir}background${extname}`))
-            obj.bgImg = `background${extname}`
-        }
 
         let dir = obj.cropDir
         if (!dir) return
@@ -165,8 +191,8 @@ module.exports = (router) => {
             let ext = ''
             for (let i of files) {
                 let fileName = dir + i
-                ext = path.extname(fileName)
-                if (ext.match('jpg') || ext.match('png') || ext.match('html')) {
+                ext = path.extname(fileName).toLowerCase()
+                if (ext.match('jpg') || ext.match('jpeg') || ext.match('png') || ext.match('html')) {
                     fileArr.push(fileName)
                 }
             }
@@ -177,6 +203,18 @@ module.exports = (router) => {
             })
             obj.fileArray = newFileArray
             console.log('第 4 步：读取本地文件')
+            if (obj.type === 'pc') {
+                gm(obj.naturalWidth, obj.naturalHeight, "#ffffff")
+                    .in('-page', '+0+0')
+                    .in(`${obj.cropDir}${files[0]}`)
+                    .in('-page', '+1550+0')
+                    .in(`${obj.cropDir}${files[1]}`)
+                    .mosaic()
+                    .write(`${obj.cropDir}background${extname}`, err => {
+                        if (err) console.log(err);
+                    })
+                obj.bgImg = `background${extname}`
+            }
             resolve(obj)
         })
     }
@@ -189,7 +227,7 @@ module.exports = (router) => {
      */
     async function compressImg(obj) {
         let dir = obj.cropDir
-        const files = await imagemin([dir + '/*.{jpg,png}'], {
+        await imagemin([dir + '/*.{jpg,JPG,jpeg,JPEG,png,PNG}'], {
             destination: dir,
             plugins: [
                 imageminJpegtran({
@@ -217,8 +255,10 @@ module.exports = (router) => {
             var fileArr = fileArr || []
             let files = fs.readdirSync(dir)
             for (let i of files) {
-                let fileName = dir + i
-                fileArr.push(fileName)
+                if (!i.includes('aside')) {
+                    let fileName = dir + i
+                    fileArr.push(fileName)
+                }
             }
             resolve(fileArr)
         })
@@ -235,7 +275,7 @@ module.exports = (router) => {
         let promises = fileList.map((file, index) => {
             return new Promise((resolve, reject) => {
                 try {
-                    var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
+                    var result = oss.put('static/pages/test/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
                     resolve(result)
                 } catch (err) {
                     console.log(err)
@@ -246,8 +286,6 @@ module.exports = (router) => {
         })
         return Promise.all(promises)
     }
-    var mobile = mobile || {}
-    mobile.uuid = uuidv1()
 
     // 生成页面接口
     router.post('/generatorPage', async (ctx, next) => {
@@ -261,7 +299,7 @@ module.exports = (router) => {
         }).then(obj => {
             return readDir(obj[0])
         }).then(obj => {
-            return compressImg(obj.cropDir)
+            return compressImg(obj)
         }).then(obj => {
             obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
             obj.fileArrayOnline = obj.fileArray.map(item => {
@@ -269,18 +307,18 @@ module.exports = (router) => {
                 return arr[arr.length - 1]
             })
             if (obj.type === 'pc') {
-                console.log('删掉background')
-                obj.fileArrayOnline.shift()
+                obj.fileArrayOnline.splice(0,2)
             }
+            mobile.newObj = obj
             router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
                 await ctx.render(`template-${obj.type}`, {
-                    obj
+                    obj: mobile.newObj
                 })
             })
         }).then(() => { // 生成静态html
             return new Promise((resolve, reject) => {
                 let pageName = Date.now() + '.html'
-                let currentDir = mobile.reqInfo.fileArray[1].match(/^(.+)img-.+$/)[1]
+                let currentDir = mobile.reqInfo.fileArray[mobile.reqInfo.fileArray.length - 1].match(/^(.+)img-.+$/)[1]
                 let htmlPath = path.join(__dirname, '../public/' + currentDir, pageName)
                 let writeStream = fs.createWriteStream(htmlPath)
                 request(mobile.reqInfo.pageUrl).pipe(writeStream)
@@ -309,8 +347,4 @@ module.exports = (router) => {
             }
         }) 
     })
-
-    
-    router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
-    router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
 }

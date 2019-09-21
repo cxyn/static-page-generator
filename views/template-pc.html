@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<link rel="shortcut icon" href="//mall.htd.cn/static/icon/htd_logo.ico" type="image/x-icon">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="<%=obj.description %>">
+<meta name="keywords" content="<%=obj.keywords %>">
+<title><%=obj.title %></title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<style>        
+    * {            
+        margin: 0;            
+        padding: 0;        
+    }        
+    img {            
+        display: block;            
+        width: 100%;            
+        height: auto;        
+    }
+    <% if(obj.linkInfor.length) { %>
+    body {
+        background: url("<%=obj.bgImg %>") no-repeat center top;
+    }
+    .container {
+        width: 1200px;
+        margin: 0 auto;
+        position: relative;
+    }
+    a {
+        position: absolute;
+    }
+    <% } %>
+</style>
+</head>
+<body>
+    {% if(obj.linkInfor.length)  %}
+    <div class="container">
+        {% for url in obj.fileArrayOnline %}
+            <img src="{{url}}">
+        {% endfor %}
+        {% for link in obj.linkInfor %}
+            <a href="{{link.link}}" style="width:{{link.width}};height:{{link.height}};top:{{link.y}};left:{{link.x}}"></a>
+        {% endfor %}
+    </div>
+    {% else %}
+        {% for url in obj.fileArrayOnline %}
+            <img src="{{url}}">
+        {% endfor %}
+   {% endif %}
+   {% if obj.obj.statistic == 1 %}
+    <!-- GrowingIO Analytics code version 2.1 -->
+    <!-- Copyright 2015-2018 GrowingIO, Inc. More info available at http://www.growingio.com -->
+    <script type='text/javascript'>
+        !function(e,t,n,g,i){e[i]=e[i]||function(){(e[i].q=e[i].q||[]).push(arguments)},n=t.createElement("script"),tag=t.getElementsByTagName("script")[0],n.async=1,n.src=('https:'==document.location.protocol?'https://':'http://')+g,tag.parentNode.insertBefore(n,tag)}(window,document,"script","assets.giocdn.com/2.1/gio.js","gio");
+        gio('init','a505ac9fbfc19720', {});
+        //custom page code begin here
+        //custom page code end here
+        gio('send');
+    </script>
+    <!-- End GrowingIO Analytics code version: 2.1 -->
+    {% endif %}
+</body>
+</html>
