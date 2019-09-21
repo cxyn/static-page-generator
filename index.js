@@ -11,7 +11,7 @@ const bodyParser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const cors = require('koa2-cors')
 const path = require('path')
-const views = require('koa-views')
+const koaNunjucks = require('koa-nunjucks-2')
 const static = require('koa-static')
 const fundebug = require("fundebug-nodejs")
 fundebug.apikey="d6bcab2ba635a359a423b5994d8fcd054222cee818b27ea00ce76d78d911adb3"
@@ -25,13 +25,21 @@ app.use(response)
 // app.use(loggerMiddleware)
 // app.use(errorHandler)
 app.use(static('./public'))
-app.use(views(path.join(__dirname, './views'), {
-    extension: 'ejs'
-}))
 app.use(favicon(__dirname + '/public/images/favicon.ico'))
 app.use(logger())
 app.use(cors())
 app.use(bodyParser())
+app.use(koaNunjucks({
+    ext: 'html',
+    path: path.join(__dirname, 'views'),
+    nunjucksConfig: {
+      trimBlocks: true,
+      noCache: true
+    },
+    configureEnvironment: (env) => {
+      env.addGlobal('timestamp', Date.now())
+    }
+}))
 require('./routes')(router)
 
 app.use(router.routes()).use(router.allowedMethods())
