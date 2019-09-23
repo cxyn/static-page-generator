@@ -144,12 +144,14 @@ $(function () {
         }) */
     }
 
+    // 点击预览区域弹出选择文件框
     $('.preview').on('click', e => {
         if (!$('.preview img').attr('src')) {
             $('.imgFile').click();
         }
     });
 
+    // 预览区载入图片处理
     $('.imgFile').change(e => {
         let img = e.target.files[0];
         page.showImg(img);
@@ -185,6 +187,7 @@ $(function () {
         }
     });
 
+    // url输入框失去焦点交互
     $(document).on('blur', '.link', function(e) {
         $(this).removeClass('on');
     });
@@ -235,7 +238,6 @@ $(function () {
             data: page.excelPath,
             success : function(data){
                 if (data.code) {
-                    console.log(data)
                     if ($('.select-areas-background-area').length) {
                         if ($('.select-areas-background-area').length > data.data.length) {
                             layer.alert('选区数量多于excel表里的url数量', {
@@ -265,8 +267,8 @@ $(function () {
     $('.generateBtn').on('click', function(e) {
         if(!$('.preview img').attr('src')) {
             layer.open({
-                title: '提示'
-                ,content: '请先选择图片'
+                title: '提示',
+                content: '请先选择图片'
             })
             return;
         }
