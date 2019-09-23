@@ -97,8 +97,8 @@ $(function () {
         let naturalWidth = 0;
         $('.preview img').on('load', function() {
             naturalWidth = $('#previewImg').get(0).naturalWidth;
-        })
-        page.switchRadio($('.radioBox :radio:checked').val());
+            page.switchRadio($('.radioBox :radio:checked').val());
+        });
         $('.preview img').selectAreas({
             minSize: [50, 50],
             onChanged: function(event, id, areas) {
