@@ -94,7 +94,10 @@ $(function () {
         let imgUrl = URL.createObjectURL(img);
         let index = 0;
         $('.preview img').attr('src', imgUrl);
-        let naturalWidth = $('#previewImg').get(0).naturalWidth;
+        let naturalWidth = 0;
+        $('.preview img').on('load', function() {
+            naturalWidth = $('#previewImg').get(0).naturalWidth;
+        })
         page.switchRadio($('.radioBox :radio:checked').val());
         $('.preview img').selectAreas({
             minSize: [50, 50],
