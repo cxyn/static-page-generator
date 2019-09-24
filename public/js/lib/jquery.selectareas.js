@@ -805,7 +805,9 @@
         }
         if (this.options.allowNudge) {
             $('html').keydown(function (e) { // move selection with arrow keys
-                if (!e.metaKey) {
+                var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+                var key = isMac? e.metaKey : e.ctrlKey
+                if (!key) {
                     var codes = {
                             37: "l",
                             38: "u",
@@ -844,7 +846,9 @@
                     direction = codes[e.which],
                     selectedArea;
 
-                    if (e.metaKey) {
+                    var isMac = /macintosh|mac os x/i.test(navigator.userAgent);
+                    var key = isMac? e.metaKey : e.ctrlKey
+                    if (key) {
                         if (direction) {
                             that._eachArea(function (area) {
                                 if (area.getData().z === 100) {

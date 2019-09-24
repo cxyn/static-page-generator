@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <link rel="shortcut icon" href="//mall.htd.cn/static/icon/htd_logo.ico" type="image/x-icon">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="description" content="<%=obj.description %>">
-<meta name="keywords" content="<%=obj.keywords %>">
-<title><%=obj.title %></title>
+<meta name="description" content="{{obj.description}}">
+<meta name="keywords" content="{{obj.keywords}}">
+<title>{{obj.title}}</title>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <style>        
     * {            
@@ -18,9 +18,9 @@
         width: 100%;            
         height: auto;        
     }
-    <% if(obj.linkInfor.length) { %>
+    {% if(obj.linkInfor.length) %}
     body {
-        background: url("<%=obj.bgImg %>") no-repeat center top;
+        background: url("{{obj.bgImg}}") no-repeat center top;
     }
     .container {
         width: 1200px;
@@ -30,11 +30,11 @@
     a {
         position: absolute;
     }
-    <% } %>
+    {% endif %}
 </style>
 </head>
 <body>
-    {% if(obj.linkInfor.length)  %}
+    {% if(obj.linkInfor.length) %}
     <div class="container">
         {% for url in obj.fileArrayOnline %}
             <img src="{{url}}">
