@@ -1,4 +1,3 @@
-const controllers = require('../controllers/index')
 const fs = require('fs')
 const gm = require('gm')
 const path = require('path')
@@ -12,19 +11,17 @@ const makeDir = require('../utils/makeDir')
 const imagemin = require('imagemin')
 const imageminJpegtran = require('imagemin-jpegtran')
 const imageminPngquant = require('imagemin-pngquant')
-module.exports = (router) => {
-    router.get('/', controllers.generator.init) // 首页
-    router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
-    router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
-    var mobile = mobile || {}
-    mobile.uuid = uuidv1()
+var mobile = mobile || {}
+mobile.uuid = uuidv1()
+module.exports = {
+
     /**
      * @description 上传图片到服务器
      *
      * @param {Object} ctx koa上下文
      * @return {String} 服务器上的图片路径
      */
-    function uploadImg(ctx) {
+    uploadImg: ctx => {
         let uploadImgDir = path.resolve(__dirname, '../public/uploads/originalImages')
         makeDir(uploadImgDir)
         return new Promise((resolve, reject) => {
@@ -34,7 +31,6 @@ module.exports = (router) => {
                     reject()
                 } else {
                     if(files && files.file && files.file.length) {
-                        //let img = path.join(__dirname, '../') + files.file[0].path  //当前切图的主体
                         let img = files.file[0].path
                         mobile.reqInfo = {
                             linkInfor: JSON.parse(fields.linkInfor[0]),
@@ -45,14 +41,15 @@ module.exports = (router) => {
                             description: fields.description[0],
                             naturalWidth: fields.naturalWidth[0],
                             naturalHeight: fields.naturalHeight[0],
-                            statistic: fields.statistic[0]
+                            statistic: fields.statistic[0],
+                            img: img
                         }
-                        resolve(img)
+                        resolve(mobile.reqInfo)
                     }
                 }
             })
         })
-    }
+    },
 
     /**
      * @description 计算每张切图的宽高
@@ -60,7 +57,7 @@ module.exports = (router) => {
      * @param {Object} obj 图片尺寸 - 宽度(obj.naturalWidth) & 高度(obj.naturalHeight) & 切图的基础高度值(obj.baseHight)
      * @return {Object} 含有heightArray的对象
      */
-    async function storeSize(obj) {
+    storeSize: async obj => {
         console.log('第 1 步：计算每块切图高度')
         let width = obj.naturalWidth
         let height = obj.naturalHeight
@@ -70,7 +67,7 @@ module.exports = (router) => {
         obj.heightArray = []                                //存储每张切图的高度
         let i = 0
         for (i; i < areaCount; i++) {
-            if (lastHeight > 0) {
+            if (lastHeight) {
                 if (i === areaCount - 1) {
                     obj.heightArray.push(lastHeight)
                 } else {
@@ -81,7 +78,7 @@ module.exports = (router) => {
             }
         }
         return await obj
-    }
+    },
 
     /**
      * @description 计算切图坐标
@@ -89,7 +86,7 @@ module.exports = (router) => {
      * @param {Object} 每张切图的高度数组(obj.heightArr) & 切图宽度(obj.naturalWidth) 
      * @return {Object} 含有positionArray 切图坐标数组的对象
      */
-    function cropPosition(obj) {
+    cropPosition: obj => {
         let coordinate_x = obj.type === 'pc'? 360 : 0
         let imgWidth = obj.type === 'pc'? 1200 : obj.naturalWidth
         return new Promise((resolve, reject) => {
@@ -134,14 +131,15 @@ module.exports = (router) => {
             console.log('第 2 步：计算切图坐标')
             resolve(obj)
         })
-    }
+    },
+
     /**
      * @description 切图api调用，累加实现计算坐标位置
      *
      * @param {Object} obj imgObject 切图主体 & positionArr 切图坐标数组
      * @return {String} promise 切图文件夹
      */
-    function crop(obj) {
+    crop: obj => {
         let imgObject = obj.img
         let positionArr = obj.positionArray
         let imgExt  = path.extname(obj.img)
@@ -170,7 +168,7 @@ module.exports = (router) => {
         })
         console.log('第 3 步：切图')
         return Promise.all(promises)
-    }
+    },
 
     /**
      * @description 递归遍历文件夹读取图片
@@ -179,12 +177,10 @@ module.exports = (router) => {
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
-    function readDir(obj) {
+    readDir: obj => {
         let extname = path.extname(obj.img)
-
         let dir = obj.cropDir
         if (!dir) return
-        
         return new Promise((resolve, reject) => {
             var fileArr = fileArr || []
             let files = fs.readdirSync(dir)
@@ -203,6 +199,7 @@ module.exports = (router) => {
             })
             obj.fileArray = newFileArray
             console.log('第 4 步：读取本地文件')
+            
             if (obj.type === 'pc') {
                 gm(obj.naturalWidth, obj.naturalHeight, "#ffffff")
                     .in('-page', '+0+0')
@@ -217,7 +214,7 @@ module.exports = (router) => {
             }
             resolve(obj)
         })
-    }
+    },
 
     /**
      * @description 压缩图片
@@ -225,7 +222,7 @@ module.exports = (router) => {
      * @param {String} obj 切图文件夹路径
      * @return {Array} fileArr 压缩切图数组
      */
-    async function compressImg(obj) {
+    compressImg: async obj => {
         let dir = obj.cropDir
         await imagemin([dir + '/*.{jpg,JPG,jpeg,JPEG,png,PNG}'], {
             destination: dir,
@@ -238,8 +235,59 @@ module.exports = (router) => {
                 })
             ]
         })
-        return await obj
-    }
+        return obj
+    },
+
+    /**
+     * @description 创建本地路由
+     *
+     * @param {Object} obj 信息主体
+     * @return {promise}
+     */
+    createRouter: (obj, ctx) => {
+        obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
+        obj.fileArrayOnline = obj.fileArray.map(item => {
+            var arr = item.split('/')
+            return arr[arr.length - 1]
+        })
+        if (obj.type === 'pc') {
+            obj.fileArrayOnline.splice(0,2)
+        }
+        mobile.reqInfo = obj
+        mobile.newObj = obj
+        let router = ctx.state.router
+        console.log(mobile.newObj)
+        console.log(router)
+        router.get(obj.pageUrl, (ctx, next) => {
+            console.log('123')
+            // await ctx.render(`template-${obj.type}`, {
+            //     obj: mobile.newObj
+            // })
+        })
+    },
+
+    /**
+     * @description 生成静态html
+     *
+     * @param {}
+     * @return {string} html url
+     */
+    generateHtml: (ctx) => {
+        console.log('++__++')
+        return
+        return new Promise((resolve, reject) => {
+            let pageName = Date.now() + '.html'
+            let currentDir = mobile.reqInfo.fileArray[mobile.reqInfo.fileArray.length - 1].match(/^(.+)img-.+$/)[1]
+            let htmlPath = path.join(__dirname, '../public/' + currentDir, pageName)
+            let writeStream = fs.createWriteStream(htmlPath)
+            request(mobile.reqInfo.pageUrl).pipe(writeStream)
+            writeStream.on('finish', () => { // 写入成功
+                let htmlUrl = ctx.origin + currentDir + pageName
+                mobile.reqInfo.htmlUrl = htmlUrl
+                resolve(mobile.reqInfo)
+            })
+        })
+    },
 
     /**
      * @description 递归遍历文件夹读取图片和html
@@ -248,7 +296,7 @@ module.exports = (router) => {
      * @param {Array} fileArr 切图数组
      * @return {Array} fileArr 切图数组
      */
-    function readDir2(obj) {
+    readDir2: obj => {
         let dir = obj.cropDir
         if (!dir) return
         return new Promise((resolve, reject) => {
@@ -262,7 +310,7 @@ module.exports = (router) => {
             }
             resolve(fileArr)
         })
-    }
+    },
 
     /**
      * @description 循环上传阿里云
@@ -270,12 +318,12 @@ module.exports = (router) => {
      * @param {Array} imgArray 切图文件夹路径
      * @return {String} 上传后的图片url
      */
-    function uploadToOss(fileList) {
+    uploadToOss: fileList => {
         let uuid = uuidv1()
         let promises = fileList.map((file, index) => {
             return new Promise((resolve, reject) => {
                 try {
-                    var result = oss.put('static/pages/auto/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
+                    var result = oss.put('static/pages/test/' + currentDate + '/' + uuid + '/' + path.basename(file), file)
                     resolve(result)
                 } catch (err) {
                     console.log(err)
@@ -286,68 +334,4 @@ module.exports = (router) => {
         })
         return Promise.all(promises)
     }
-
-    // 生成页面接口
-    router.post('/generatorPage', async (ctx, next) => {
-        await uploadImg(ctx).then(img => {
-            mobile.reqInfo.img = img
-            return storeSize(mobile.reqInfo)
-        }).then(obj => {
-            return cropPosition(obj)
-        }).then(obj => {
-            return crop(obj)
-        }).then(obj => {
-            return readDir(obj[0])
-        }).then(obj => {
-            return compressImg(obj)
-        }).then(obj => {
-            obj.pageUrl = ctx.origin + '/static-page-' + mobile.uuid
-            obj.fileArrayOnline = obj.fileArray.map(item => {
-                var arr = item.split('/')
-                return arr[arr.length - 1]
-            })
-            if (obj.type === 'pc') {
-                obj.fileArrayOnline.splice(0,2)
-            }
-            mobile.newObj = obj
-            router.get('/static-page-' + mobile.uuid, async (ctx, next) => {
-                await ctx.render(`template-${obj.type}`, {
-                    obj: mobile.newObj,
-                    timeStamp: Date.now()
-                })
-            })
-        }).then(() => { // 生成静态html
-            return new Promise((resolve, reject) => {
-                let pageName = 'index.html'
-                let currentDir = mobile.reqInfo.fileArray[mobile.reqInfo.fileArray.length - 1].match(/^(.+)img-.+$/)[1]
-                let htmlPath = path.join(__dirname, '../public/' + currentDir, pageName)
-                let writeStream = fs.createWriteStream(htmlPath)
-                request(mobile.reqInfo.pageUrl).pipe(writeStream)
-                writeStream.on('finish', () => { // 写入成功
-                    resolve(ctx.origin + currentDir + pageName)
-                })
-            })
-        }).then(url => { // 读取文件夹下所有图片和html
-            return readDir2(mobile.reqInfo)
-        }).then(fileList => { //上传至阿里云
-            return uploadToOss(fileList)
-        }).then(list => { // 接口输出
-            let host = 'https://fe-static.htd.cn/'
-            let name = list.filter(item => { return item.name.includes('html')})[0].name
-            ctx.body = {
-                code: 1,
-                message: 'success',
-                data: {
-                    list: list,
-                    url: host + name
-                }
-            }
-        }).catch(e => {
-            ctx.body = {
-                code: 0,
-                message: 'fail',
-                data: e
-            }
-        }) 
-    })
 }
