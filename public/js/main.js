@@ -109,7 +109,7 @@ $(function () {
                 if(areas.length === $('.link').length + 1) {
                     index ++;
                     let _link = '<div class="formItem linkItem' + id + '">'+
-                    '                <label for="">第' + index + '块区域的链接：</label><input type="text" class="link" placeholder="请输入链接地址" value="">'+
+                    '                <label for="">第' + index + '块区域的链接：</label><input type="text" class="link fillItem" placeholder="请输入链接地址" value="">'+
                     '            </div>';
                     $('.linkBox').append(_link);
                 }
@@ -218,7 +218,7 @@ $(function () {
             success : function(data){
                 console.log(data)
                 if (data.code) {
-                    $('.uploadExcel').addClass('hide');
+                    $('.uploadExcel').text('重新上传');
                     $('.fillUrl').removeClass('hide');
                     page.excelPath = data.data.url;
                 } else {
@@ -239,18 +239,18 @@ $(function () {
             success : function(data){
                 if (data.code) {
                     if ($('.select-areas-background-area').length) {
-                        if ($('.select-areas-background-area').length > data.data.length) {
+                        if ($('.select-areas-background-area').length > data.data.length - 2) {
                             layer.alert('选区数量多于excel表里的url数量', {
-                                icon: 1
+                                icon: 0
                             });
-                       } else if ($('.select-areas-background-area').length < data.data.length){
+                       } else if ($('.select-areas-background-area').length < data.data.length - 2){
                             layer.alert('选区数量少于excel表里的url数量', {
-                                icon: 1
+                                icon: 0
                             });
                        } else {
-                           $('.link').each(function(index, item) {
+                           $('.fillItem').each(function(index, item) {
                                $(item).val(data.data[index]);
-                           })
+                           });
                        }
                     } else {
                         layer.alert('请上传预览图片，如若已上传请框选相应数量的链接区块', {
