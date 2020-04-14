@@ -32,12 +32,13 @@
 </head>
 <body>
         {% for url in obj.fileArrayOnline %}
-            <img src="{{url}}">
+        <img src="{{url}}">
         {% endfor %}
 
         {% for link in obj.linkInfor %}
-            <a href="{{link.link}}" style="width:{{link.width}};height:{{link.height}};top:{{link.y}};left:{{link.x}}"></a>
+        <a href="{{link.link}}" style="width:{{link.width}};height:{{link.height}};top:{{link.y}};left:{{link.x}}"></a>
         {% endfor %}
+
         {% if obj.statistic == 1 %}
         <!-- GrowingIO Analytics code version 2.1 -->
         <!-- Copyright 2015-2018 GrowingIO, Inc. More info available at http://www.growingio.com -->
@@ -50,6 +51,136 @@
         </script>
         <!-- End GrowingIO Analytics code version: 2.1 -->
         {% endif %}
+
+        <!-- 开启唤醒APP -->
+        {% if obj.callAPP == 1 %}
+        <script type='text/javascript'>
+            function getCookie(key) {
+                var cookie = document.cookie;
+                var cookieArray = cookie.split('; ');
+                for (var i = cookieArray.length - 1; i >= 0; i--) {
+                    var param = cookieArray[i].split('=');
+                    if (param[0] == key) {
+                        return param[1];
+                    }
+                }
+            }
+            var isNative = !!getCookie('__MEMBERCODE__');
+            if (!isNative) {
+                var links = document.querySelectorAll('a');
+                links.forEach(function(anchor) {
+                    var url = location.href;
+                    anchor.href = 'https://m.htd.cn/bossapp_front/activity/shareGoods.html?url=' + url + '&productid=1&optTypeCode=21';
+                });
+            }
+            // if (isNative) {
+            //     var links = document.querySelectorAll('a');
+            //     var pattern = /.+url\=(.+)(\&|\?)productid/;
+            //     links.forEach(function(anchor) {
+            //         var url = anchor.href;
+            //         if (url.indexOf('url=') > -1) {
+            //             anchor.href = url.match(pattern)[1];
+            //         }
+            //     });
+            // }
+        </script>
+        {% endif %}
+
+        <!-- 开启微信分享 -->
+        {% if obj.share == 1 %}
+        <input type="hidden" class="shareTitle" value='{{obj.title}}'>
+        <input type="hidden" class="shareDesc" value='{{obj.description}}'>
+        <input type="hidden" class="shareUrl" value='{{obj.shareThumbnail}}'>
+        <script type='text/javascript' src="https://fe-static.htd.cn/common/js/jweixin-1.6.0.js"></script>
+        <script type='text/javascript'>
+            function jsonp(obj) {
+                var callbackName = "s" + Math.random().toString().split("\.")[1];
+                var scriptObj = document.createElement("script");
+                obj.param = obj.param || '';
+                    if (typeof obj.param == 'object') {
+                    var arr = new Array();
+                    for (var key in obj.param) {
+                        arr.push(key + '=' + obj.param[key])
+                    }
+                    obj.param = arr.join('&');
+                }
+                scriptObj.src = obj.url + '?' + 'callback=' + callbackName + '&' + obj.param;
+                document.getElementsByTagName('head')[0].appendChild(scriptObj);
+                window[callbackName] = function (res) {
+                    obj.success(res);
+                    delete window.callbackName;
+                    document.getElementsByTagName('head')[0].removeChild(scriptObj);
+                }
+            }
+
+            function wxRegister(option){
+                let param = {
+                    url: encodeURIComponent(location.href.split('#')[0])
+                }
+                jsonp({
+                        url: 'https://app.htd.cn/weixin/apiSignature.htm',
+                        param: {
+                            param: JSON.stringify(param),
+                            platform: 'wapjs'
+                        },
+                        success: function(data){
+                            let appId = data.data.wx_appId;
+                            let nonceStr = data.data.wx_noncestr;
+                            let signature = encodeURIComponent(data.data.wx_signature);
+                            let timestamp = data.data.wx_timestamp;
+                            wx.config({
+                                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                                appId: appId, // 必填，公众号的唯一标识
+                                timestamp: timestamp, // 必填，生成签名的时间戳
+                                nonceStr: nonceStr, // 必填，生成签名的随机串
+                                signature: signature, // 必填，签名，见附录1
+                                jsApiList: [
+                                'updateAppMessageShareData',
+                                'updateTimelineShareData'
+                                ]
+                            });
+
+                            wx.ready(function () {
+                                // 如果需要定制ready回调方法
+                                share();
+                            });
+                        }
+                    });
+                
+            } 
+            function share() {
+                let link = location.href;
+                if (location.href.indexOf('from') > -1) {
+                    link = location.href.split('?')[0];
+                }
+                // 分享给朋友
+                wx.updateAppMessageShareData({ 
+                    title: '{{obj.title}}', // 分享标题
+                    desc: '{{obj.description}}', // 分享描述
+                    link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                    imgUrl: '{{obj.shareThumbnail}}', // 分享图标
+                    success: function () {
+                        // 设置成功
+                    }
+                });
+
+                // 分享到朋友圈
+                wx.updateTimelineShareData({ 
+                    title: '{{obj.description}}', // 分享标题
+                    link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                    imgUrl: '{{obj.shareThumbnail}}', // 分享图标
+                    success: function () {
+                        // 设置成功
+                    }
+                });
+            }  
+
+
+            wxRegister(); 
+        </script>
+        {% endif %}
+        
+        
 
 </body>
 </html>

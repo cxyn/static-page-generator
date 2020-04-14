@@ -44,7 +44,7 @@ body {
                 padding-top: 160px;
                 color: #ccc;
                 .iconfont {
-                    font-size: 50px;
+                    font-size: 60px;
                 }
                 h4 {
                     font-size: 18px;
@@ -78,6 +78,9 @@ body {
                 line-height: 40px;
                 label {
                     display: block;
+                    span {
+                        color: #f60;
+                    }
                 }
                 .iconfont {
                     font-size: 14px;
@@ -126,35 +129,79 @@ body {
                 }
             } 
         }
-        @at-root .statistic {
+        @at-root .extra {
             margin: 20px 0;
             padding-left: 1px;
-            @at-root .checkBox {
+            display: flex;
+            
+            @at-root .statistic {
+                @at-root .checkBox {
+                    position: relative;
+                    padding-left: 15px;
+                    input {
+                        display: none;
+                        &:checked + label {
+                            color: #f70;
+                            &::before {
+                                font-size: 16px;
+                                content: "\e655";
+                                color: #f70;
+                            }
+                        }
+                    }
+                    
+                    label {
+                        margin: 0 20px 0 5px;
+                        font-size: 14px;
+                        &::before{
+                            font-size: 16px;
+                            font-family: "iconfont" !important;
+                            content: "\e6ac";
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            color: #999;
+                        }
+                    }
+                } 
+            }
+        }
+        @at-root .thumbList {
+            overflow: hidden;
+            li {
+                width: 50px;
+                height: 50px;
+                margin-right: 10px;
+                border: 1px solid transparent;
+                float: left;
                 position: relative;
-                padding-left: 15px;
-                input {
-                    display: none;
-                    &:checked + label::before {
-                        font-size: 16px;
-                        content: "\e655";
-                        color: #f70;
-                    }
-                }
-                
-                label {
-                    margin: 0 20px 0 5px;
-                    font-size: 14px;
-                    &::before{
-                        font-size: 16px;
-                        font-family: "iconfont" !important;
-                        content: "\e6ac";
+                &.on {
+                    border-color: #f60;
+                    i {
                         position: absolute;
+                        right: 0;
                         top: 0;
-                        left: 0;
-                        color: #999;
+                        color: #f00;
+                        font-size: 12px;
                     }
                 }
-            } 
+                img {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                }
+                &.addImg {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #fff;
+                    i {
+                        font-size: 20px;
+                        color: #aaa;
+                    }
+
+                }
+            }
         }
         @at-root .actionBox {
             display: flex;
@@ -180,6 +227,11 @@ body {
         }
 
     }
+}
+
+
+input[type=file] {
+    display: none;
 }
 
 

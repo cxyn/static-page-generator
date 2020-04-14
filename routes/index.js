@@ -16,6 +16,7 @@ module.exports = (router) => {
     router.get('/', controllers.generator.init) // 首页
     router.get('/readXlsx', controllers.excel.read)       // 读取excel接口
     router.post('/uploadLocal', controllers.excel.upload) // 上传excel接口
+    router.post('/uploadShareThumbnail', controllers.common.uploadShareThumbnail) // 上传分享图标接口
     var mobile = mobile || {}
     mobile.uuid = uuidv1()
     /**
@@ -45,7 +46,10 @@ module.exports = (router) => {
                             description: fields.description[0],
                             naturalWidth: fields.naturalWidth[0],
                             naturalHeight: fields.naturalHeight[0],
-                            statistic: fields.statistic[0]
+                            statistic: fields.statistic[0],
+                            share: fields.share[0],
+                            shareThumbnail: fields.shareThumbnail[0],
+                            callAPP: fields.callAPP[0]
                         }
                         resolve(img)
                     }
@@ -238,6 +242,7 @@ module.exports = (router) => {
                 })
             ]
         })
+        console.log('压缩图片')
         return await obj
     }
 

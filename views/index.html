@@ -9,7 +9,7 @@
     <script src='js/lib/layer/layer.js'></script>
     <script src='js/lib/jquery.selectareas.js'></script>
     <link rel="stylesheet" href="js/lib/resources/jquery.selectareas.css">
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_1402434_xsqysjfl1z.css">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1402434_ftknxntnx7d.css">
     
 <body>
     <div class="box clearfix">
@@ -18,7 +18,7 @@
             <div class="preview">
                 <img src="" alt="" id="previewImg">
                 <div class="previewTps">
-                    <i class="iconfont icon-upload"></i>
+                    <i class="iconfont icon-upload1"></i>
                     <h4>[拖放预览或点击区域选取图片]</h4>
                     <p>请拖拽图片文件到此预览区域或者点击此区域在弹窗里选择图片文件</p>
                 </div>
@@ -32,23 +32,49 @@
                     <label for=""><i class="iconfont icon-height"></i>切块基准高度(px)：</label><input type="text" class="baseHeight" placeholder="请输入切块基准高度(px)" value="500">
                 </div>
                 <div class="formItem">
-                    <label for=""><i class="iconfont icon-title"></i>页面 Title：</label><input type="text" class="pageTitle fillItem" placeholder="请输入页面title" value="">
+                    <label for=""><i class="iconfont icon-title"></i>页面 Title<span>（微信分享标题）</span>：</label><input type="text" class="pageTitle fillItem" placeholder="请输入页面title" value="">
+                </div>
+                <div class="formItem">
+                    <label for=""><i class="iconfont icon-description"></i>Meta Description<span>（微信分享描述）</span>：</label><input type="text" class="pageDesc fillItem" placeholder="请输入页面描述" value="">
                 </div>
                 <div class="formItem">
                     <label for=""><i class="iconfont icon-keyword"></i>Meta Keywords：</label><input type="text" class="pageKeywords" placeholder="请输入页面关键词" value="">
                 </div>
-                <div class="formItem">
-                    <label for=""><i class="iconfont icon-description"></i>Meta Description：</label><input type="text" class="pageDesc fillItem" placeholder="请输入页面描述" value="">
-                </div>
                 <div class="linkBox">
                 </div>
             </div>
-            <div class="statistic">
-                <div class="checkBox">
-                    <input type="checkbox" name="statistic" id="statistic" value="">
-                    <label for="statistic">启用统计</label>
+            <div class="extra">
+                <div class="statistic">
+                    <div class="checkBox">
+                        <input type="checkbox" name="statistic" id="statistic" value="" checked>
+                        <label for="statistic">启用统计</label>
+                    </div>
+                </div>
+                <div class="shareBox">
+                    <div class="checkBox">
+                        <input type="checkbox" name="share" id="share" value="">
+                        <label for="share">开启微信分享</label>
+                    </div>
+                </div>
+                <div class="callApp">
+                    <div class="checkBox">
+                        <input type="checkbox" name="callApp" id="callApp" value="">
+                        <label for="callApp">开启唤醒APP（超级老板采购）</label>
+                    </div>
                 </div>
             </div>
+            <ul class="thumbList hide">
+                <li>
+                    <img src="https://wsc.htd.cn/static/public/img/logo1.jpg" alt="">
+                </li>
+                <li>
+                    <img src="https://m.htd.cn/bossapp_front/static/public/img/supperbossappicon108.png" alt="">
+                </li>
+                <li class="addImg">
+                    <i class="iconfont icon-upload1"></i>
+                </li>
+            </ul>
+            <input type="file" class="thumbFile">
             <div class="pageType">
                 <div class="radioBox">
                     <input type="radio" name="pageType" id="mobile" value="mobile" checked>

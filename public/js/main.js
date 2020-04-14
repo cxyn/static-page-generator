@@ -124,6 +124,48 @@ $(function () {
         });
     }
 
+    // 上传分享缩略图
+    page.uploadShareThumbnail = function(img) {
+        let type = img.type.toLowerCase();
+        if(type.indexOf("image/") == -1) {
+            layer.alert('请上传图片类型的文件', {
+                icon: 0
+            });
+            return;
+        }
+        if(type.indexOf("png") == -1 && type.indexOf("jpg") == -1 && type.indexOf("jpeg") == -1) {
+            layer.alert('仅支持jpg和png格式的图片', {
+                icon: 0
+            });
+            return;
+        }
+        var index = layer.load(3, {
+            shade: [0.1, '#000']
+        });
+        let data = new FormData();
+        data.append("file", img);
+        $.ajax({
+            url: "/uploadShareThumbnail",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: data,
+            cache: false,
+            success : function(data){
+                layer.close(index);
+                if (data.code == 1) {
+                    $('.thumbList li').eq($('.thumbList li').length - 2).after('<li><img src="' + data.data + '" alt=""></li>');
+                    $('.thumbList li').eq($('.thumbList li').length - 2).click();
+                } else {
+                    layer.alert(data.msg, {
+                        icon: 0
+                    });
+                    return;
+                }
+            }
+        })
+    }
+
     // 拷贝切块
     page.copyArea = (selector) => {
         let areaOptions = JSON.parse(localStorage.getItem('area'));
@@ -154,7 +196,7 @@ $(function () {
     // 预览区载入图片处理
     $('.imgFile').change(e => {
         let img = e.target.files[0];
-        page.showImg(img);
+        img && page.showImg(img);
     });
 
     // 阻止拖拽默认行为
@@ -199,39 +241,41 @@ $(function () {
 
     // 上传excel
     $('.excel').on('change', function(e) {
-        let type = this.files[0].type;
-        if (!type.includes('excel') && !type.includes('sheet')) {
-            layer.alert('请上传 .xls 或者 .xlsx 文件', {
-                icon: 0
-              });
-            return;
-        }
-        let data = new FormData();
-        data.append('file', this.files[0]);
-        $.ajax({
-            url: "/uploadLocal",
-            type: "POST",
-            processData: false,
-            contentType: false,
-            data: data,
-            cache: false,
-            success : function(data){
-                console.log(data)
-                if (data.code) {
-                    $('.uploadExcel').text('重新上传');
-                    $('.fillUrl').removeClass('hide');
-                    page.excelPath = data.data.url;
-                } else {
-                    layer.alert(data.message, {
-                        icon: 0
-                    });
-                }
+        if (this.files[0]) {
+            let type = this.files[0].type;
+            if (!type.includes('excel') && !type.includes('sheet')) {
+                layer.alert('请上传 .xls 或者 .xlsx 文件', {
+                    icon: 0
+                });
+                return;
             }
-        })
+            let data = new FormData();
+            data.append('file', this.files[0]);
+            $.ajax({
+                url: "/uploadLocal",
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: data,
+                cache: false,
+                success : function(data){
+                    if (data.code) {
+                        $('.uploadExcel').text('重新上传');
+                        $('.fillUrl').removeClass('hide');
+                        page.excelPath = data.data.url;
+                    } else {
+                        layer.alert(data.message, {
+                            icon: 0
+                        });
+                    }
+                }
+            });
+        }
+        
     });
     
     // 点击填充数据
-    $('.fillUrl').on('click', function() {
+    $(document).on('click', '.fillUrl', function() {
         $.ajax({
             url: "/readXlsx",
             type: "GET",
@@ -266,20 +310,22 @@ $(function () {
     // 点击生成页面
     $('.generateBtn').on('click', function(e) {
         if(!$('.preview img').attr('src')) {
-            layer.open({
-                title: '提示',
-                content: '请先选择图片'
-            })
+            layer.alert('请先选择图片', {
+                icon: 0
+            });
             return;
         }
         let data = new FormData();
         let pageInfo = {
-            baseHeight: $.trim($('.baseHeight').val()),
-            title: $.trim($('.pageTitle').val()),
-            keywords: $.trim($('.pageKeywords').val()),
-            type: $('.pageType :radio:checked').val(),
-            description: $.trim($('.pageDesc').val()),
-            statistic: $('#statistic').is(':checked')? 1 : 0
+            baseHeight: $.trim($('.baseHeight').val()),                     // 基准高度
+            title: $.trim($('.pageTitle').val()),                           // 标题
+            keywords: $.trim($('.pageKeywords').val()),                     // 关键词
+            type: $('.pageType :radio:checked').val(),                      // 页面类型 mobile 或者 pc
+            description: $.trim($('.pageDesc').val()),                      // 描述
+            statistic: $('#statistic').is(':checked')? 1 : 0,               // 是否开启统计             
+            share: $('#share').is(':checked')? 1 : 0,                       // 是否开启微信分享
+            shareThumbnail: $('.thumbList li.on img').attr('src'),          // 微信分享缩略图
+            callAPP: $('#callApp').is(':checked')? 1 : 0,                   // 是否开启唤醒APP
         }
         if(!pageInfo.baseHeight) {
             layer.open({
@@ -300,7 +346,17 @@ $(function () {
             })
             return;
         }
-        var layerIndex = layer.load();
+        if ($('#share').is(':checked')) {
+            if ($('.thumbList li.on').length == 0) {
+                layer.alert('请选择或上传微信分享缩略图', {
+                    icon: 0
+                });
+                return;
+            }
+        }
+        var layerIndex = layer.load(3, {
+            shade: [0.1, '#000']
+        });
         if(page.model) {
             page.linkInfor = page.calSize(page.model, page.ratio, page.vw_ratio);
             $('.link').each(function(linkIndex) {
@@ -319,6 +375,9 @@ $(function () {
         data.append("description", pageInfo.description);
         data.append("type", pageInfo.type);
         data.append("statistic", pageInfo.statistic);
+        data.append("share", pageInfo.share);
+        data.append("shareThumbnail", pageInfo.shareThumbnail);
+        data.append("callAPP", pageInfo.callAPP);
         data.append("linkInfor", JSON.stringify(page.linkInfor));
         data.append("naturalWidth", document.querySelector('#previewImg').naturalWidth);
         data.append("naturalHeight", document.querySelector('#previewImg').naturalHeight);
@@ -358,4 +417,29 @@ $(function () {
     $(document).on('copy', '.link', function(e) {
         page.copyArea('.preview img');
     });
+
+    // 显示/隐藏 缩略图开关
+    $('#share').on('change', function(e) {
+        if (this.checked) {
+            $('.thumbList').slideDown(300);
+        } else {
+            $('.thumbList').slideUp(300);
+        }
+    });
+
+    // 选择分享缩略图
+    $(document).on('click', '.thumbList li:not(".addImg")', function(e) {
+        $(this).addClass('on').append('<i class="iconfont icon-selected"></i>');
+        $(this).siblings().removeClass('on').find('.icon-selected').remove();
+    });
+    // 点击上传分享图标按钮弹出选择文件框
+    $(document).on('click', '.addImg', function(e) {
+        $('.thumbFile').click();
+    });
+    // 点击上传分享图标按钮弹出选择文件框
+    $(document).on('change', '.thumbFile', function(e) {
+        let img = e.target.files[0];
+        img && page.uploadShareThumbnail(img);
+    });
+
 })
