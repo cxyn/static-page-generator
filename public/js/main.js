@@ -5,10 +5,11 @@ $(function () {
     page.ratio = 0;
     page.vw_ratio = 0;
     page.linkInfor = [];
+    page.areaInfo = [];
 
     // 计算切块尺寸
-    page.calSize = (arr, ratio, vw_ratio) => {
-        let newArr = arr.map((item) => {
+    page.calSize = function(arr, ratio, vw_ratio) {
+        let newArr = arr.map(function(item) {
             let model = null;
             let radioValue = $('.pageType :radio:checked').val();
             if (radioValue == 'mobile') {
@@ -38,7 +39,8 @@ $(function () {
     }
 
     // 检测预览图片是否符合所选切图类型
-    page.switchRadio = (type, boundary=1080) => {
+    page.switchRadio = function(type, boundary) {
+        boundary = boundary || 1080;
         let width = $('#previewImg').get(0).naturalWidth;
         if(width <= boundary && type === 'pc') {
             layer.open({
@@ -102,7 +104,8 @@ $(function () {
         $('.preview img').selectAreas({
             minSize: [50, 50],
             onChanged: function(event, id, areas) {
-                localStorage.setItem('area', JSON.stringify(areas[id]))
+                page.areaInfo = areas;
+                localStorage.setItem('area', JSON.stringify(areas[id]));
                 page.model = $(this).selectAreas('relativeAreas');
                 page.ratio = naturalWidth / 500;
                 page.vw_ratio = naturalWidth / 100;
@@ -167,7 +170,7 @@ $(function () {
     }
 
     // 拷贝切块
-    page.copyArea = (selector) => {
+    page.copyArea = function(selector) {
         let areaOptions = JSON.parse(localStorage.getItem('area'));
         if (areaOptions.width < $('.preview').width() / 2) {
             areaOptions.x += 40;
@@ -187,44 +190,44 @@ $(function () {
     }
 
     // 点击预览区域弹出选择文件框
-    $('.preview').on('click', e => {
+    $('.preview').on('click', function(e) {
         if (!$('.preview img').attr('src')) {
             $('.imgFile').click();
         }
     });
 
     // 预览区载入图片处理
-    $('.imgFile').change(e => {
+    $('.imgFile').change(function(e) {
         let img = e.target.files[0];
         img && page.showImg(img);
     });
 
     // 阻止拖拽默认行为
     $(document).on({ 
-        dragleave: e => {
+        dragleave: function(e) {
             e.preventDefault(); 
         }, 
-        drop: e => {
+        drop: function(e) {
             e.preventDefault(); 
         }, 
-        dragenter: e => {
+        dragenter: function(e) {
             e.preventDefault(); 
         }, 
-        dragover: e => {
+        dragover: function(e) {
             e.preventDefault(); 
         } 
     }); 
     // 拖拽预览图交互
     $('.preview').on({
-        drop: e => {
+        drop: function(e) {
             let img = e.originalEvent.dataTransfer.files[0];
             $('.previewTps').addClass('hide');
             page.showImg(img)
         },
-        dragover: e => {
+        dragover: function(e) {
             $('.previewTps').css('color', '#f70');
         },
-        dragleave: e => {
+        dragleave: function(e) {
             $('.previewTps').css('color', '#aaa');
         }
     });
@@ -235,7 +238,7 @@ $(function () {
     });
 
     // 点击填充数据
-    $('.uploadExcel').on('click', e => {
+    $('.uploadExcel').on('click', function(e) {
         $('.excel').click();   
     });
 
@@ -381,6 +384,10 @@ $(function () {
         data.append("linkInfor", JSON.stringify(page.linkInfor));
         data.append("naturalWidth", document.querySelector('#previewImg').naturalWidth);
         data.append("naturalHeight", document.querySelector('#previewImg').naturalHeight);
+
+
+        localStorage.setItem('areaInfo', JSON.stringify(page.areaInfo));
+
         $.ajax({
             url: "/generatorPage",
             type: "POST",
@@ -440,6 +447,25 @@ $(function () {
     $(document).on('change', '.thumbFile', function(e) {
         let img = e.target.files[0];
         img && page.uploadShareThumbnail(img);
+    });
+
+    // 使用上次切图数据
+    $('.fillLastData').on('click', function() {
+        if(!$('.preview img').attr('src')) {
+            layer.alert('请先选择图片', {
+                icon: 0
+            });
+            return;
+        }
+        if (!localStorage.getItem('areaInfo')) {
+            layer.alert('查询不到上一次的切图数据，请手动切图', {
+                icon: 0
+            });
+        } else {
+            var areaOptions = JSON.parse(localStorage.getItem('areaInfo'));
+            $('.preview img').selectAreas('add', areaOptions);
+        }
+        
     });
 
 })

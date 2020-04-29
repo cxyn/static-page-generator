@@ -65,24 +65,41 @@
                     }
                 }
             }
-            var isNative = !!getCookie('__MEMBERCODE__');
-            if (!isNative) {
-                var links = document.querySelectorAll('a');
-                links.forEach(function(anchor) {
-                    var url = location.href;
-                    anchor.href = 'https://m.htd.cn/bossapp_front/activity/shareGoods.html?url=' + url + '&productid=1&optTypeCode=21';
-                });
+
+            function formatUrl(type = 1) {
+                if (type == 1) {
+                    var links = document.querySelectorAll('a');
+                    var pattern = /.+url\=(.+)(\&|\?)productid/;
+                    links.forEach(function(anchor) {
+                        var url = anchor.href
+                        if (url.indexOf('url=') > -1) {
+                            anchor.href = url.match(pattern)[1];
+                        }
+                    });
+                }
+
+                if (type == 2) {
+                    var links = document.querySelectorAll('a');
+                    var pattern = /.+url\=(.+)(\&|\?)productid/;
+                    if (getCookie('__ISNATIVE__')) {
+                        links.forEach(function(anchor) {
+                            var url = anchor.href;
+                            if (url.indexOf('url=') > -1) {
+                                anchor.href = url.match(pattern)[1];
+                            }
+                        });
+                    } else {
+                        links.forEach(function(anchor) {
+                            var url = location.href;
+                            anchor.href = 'https://m.htd.cn/bossapp_front/activity/shareGoods.html?url=' + url + '?productid=1&optTypeCode=21';
+                        });     
+                    }
+                }
             }
-            // if (isNative) {
-            //     var links = document.querySelectorAll('a');
-            //     var pattern = /.+url\=(.+)(\&|\?)productid/;
-            //     links.forEach(function(anchor) {
-            //         var url = anchor.href;
-            //         if (url.indexOf('url=') > -1) {
-            //             anchor.href = url.match(pattern)[1];
-            //         }
-            //     });
-            // }
+
+            formatUrl(2);
+
+            
         </script>
         {% endif %}
 
