@@ -235,10 +235,10 @@ module.exports = (router) => {
             destination: dir,
             plugins: [
                 imageminJpegtran({
-                    quality: [0.6, 0.8]
+                    quality: [1, 1]
                 }),
                 imageminPngquant({
-                    quality: [0.6, 0.8]
+                    quality: [1, 1]
                 })
             ]
         })

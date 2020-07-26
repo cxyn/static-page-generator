@@ -40,7 +40,7 @@ $(function () {
 
     // 检测预览图片是否符合所选切图类型
     page.switchRadio = function(type, boundary) {
-        boundary = boundary || 1080;
+        boundary = boundary || 1200;
         let width = $('#previewImg').get(0).naturalWidth;
         if(width <= boundary && type === 'pc') {
             layer.open({
